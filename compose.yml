@@ -1,0 +1,40 @@
+# Use postgres/example user/password credentials
+version: "1.0"
+
+services:
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks: ['pg']
+
+  pg:
+    image: postgres:latest
+    container_name: pg
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: db
+    networks: ['pg']
+    ports:
+      - 5432:5432
+
+
+  api:
+    container_name: api
+    build: .
+    ports:
+      - 4000:4000
+    depends_on:
+      - pg 
+    links:
+      - pg
+      - surrealdb
+    networks: ['pg']
+
+networks:
+  pg:
+    driver: bridge
+

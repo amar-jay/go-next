@@ -1,0 +1,9 @@
+.PHONY: build test
+build:
+	go build -o bin/ ./cmd/...
+test:
+	go test -v ./...
+run:
+	go run ./cmd/...
+clean:
+	rm -rf bin/

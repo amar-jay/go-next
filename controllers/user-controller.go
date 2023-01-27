@@ -17,11 +17,18 @@ import (
 /**
 *  --- Types ---
  */
-type UserInput struct {
+type LoginUserInput struct {
   Email string `json:"email"`
   Password string `json:"password"`
 }
 
+type RegisterUserInput struct {
+  FirstName string `json:"firstname"`
+  LastName string `json:"lastname"`
+  Email string `json:"email"`
+  Password string `json:"password"`
+  Role string `json:"role"`
+}
 type UserOutput struct {
   ID uint `json:"ID"`
   FirstName string `json:"firstname"`
@@ -77,7 +84,7 @@ func NewUserController(us userservice.UserService, as authservice.AuthService, e
 func (userctrl *userController) Login(ctx *gin.Context) {
 
   // TODO: Get user input 
-  var input UserInput
+  var input LoginUserInput
 
   if err := ctx.ShouldBindJSON(&input); err != nil {
     HttpResponse(ctx, http.StatusBadRequest, err.Error(), nil)
@@ -88,12 +95,13 @@ func (userctrl *userController) Login(ctx *gin.Context) {
   user, err := userctrl.us.GetUserByEmail(input.Email)
   if err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
+    return
   }
 
   // TODO: Check Password 
   err = userctrl.us.ComparePassword(input.Password, user.Password)
   if err != nil {
-    HttpResponse(ctx, http.StatusBadRequest, err.Error(), nil)
+    HttpResponse(ctx, http.StatusBadRequest, "password does not match", nil)
     return
   }
   // TODO: Login 
@@ -105,10 +113,9 @@ func (userctrl *userController) Login(ctx *gin.Context) {
 
 func (userctrl *userController) Register(ctx *gin.Context) {
   //  read the user input
-  var userInput UserInput
+  var userInput RegisterUserInput
   if err := ctx.ShouldBindJSON(&userInput); err != nil {
-
-  HttpResponse(ctx, http.StatusBadRequest, err.Error(), nil)
+    HttpResponse(ctx, http.StatusBadRequest, err.Error(), nil)
     return
   } 
 
@@ -116,7 +123,6 @@ func (userctrl *userController) Register(ctx *gin.Context) {
 
   // create a user
   if err := userctrl.us.Register(&u); err != nil {
-    
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
     return
   }
@@ -124,19 +130,22 @@ func (userctrl *userController) Register(ctx *gin.Context) {
   // TODO: send a welcome message
   if err := userctrl.es.Welcome(u.Email); err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
+    return
   }
 
   //  login the user
   if err := userctrl.login(ctx, &u); err != nil {
-    HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
+    HttpResponse(ctx, http.StatusMethodNotAllowed, err.Error(), nil)
     return
   }
+
+  HttpResponse(ctx, http.StatusOK, "Logged In Successfully", nil)
 }
 
 func (userctrl *userController) Update(ctx *gin.Context) {
   // read the user id
   input, exists := ctx.Get("user_id")
-  if exists == false {
+  if !exists {
     HttpResponse(ctx, http.StatusBadRequest, "Invalid user ID entered", nil)
     return
   }
@@ -184,7 +193,7 @@ func (user *userController) ForgotPassword(ctx *gin.Context) {
 func (userctrl *userController) GetProfile(ctx *gin.Context) {
   id, exists := ctx.Get("user_id")
 
-  if exists == false {
+  if !exists {
     HttpResponse(ctx, http.StatusBadRequest, "Invalid User ID fetched", nil)
     return
   }
@@ -197,7 +206,6 @@ func (userctrl *userController) GetProfile(ctx *gin.Context) {
 
   userOutput := userctrl.mapToUserOutput(user)
   HttpResponse(ctx, http.StatusOK, "ok", userOutput)
-  return
 }
 
 func (userctrl *userController) GetUsers(ctx *gin.Context) {
@@ -215,7 +223,6 @@ func (userctrl *userController) GetUsers(ctx *gin.Context) {
   }
 
   HttpResponse(ctx, http.StatusOK, "ok", usersOut)
-  return
 }
 
 func (userctrl *userController) GetUserByID(ctx *gin.Context) {
@@ -246,10 +253,16 @@ func (userctrl *userController) GetUserByID(ctx *gin.Context) {
 * --- Other methods
 */
 
-func (userctrl *userController) inputToUser(input UserInput) user.User {
+func (userctrl *userController) inputToUser(input RegisterUserInput) user.User {
+
+
   return user.User{
+    FirstName: input.FirstName,
+    LastName: input.LastName,
     Email:  input.Email,
     Password: input.Password,
+    Role: input.Role,
+    Active: true,
   }
 }
 

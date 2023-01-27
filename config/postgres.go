@@ -45,11 +45,11 @@ func GetPostgresConfig() PostgresConfig {
 func getPort(input string) int {
 	port, err := strconv.Atoi(os.Getenv(input))
 	if err != nil {
-		fmt.Println("Error in parsing POSTGRES_PORT. Setting to 5432")
+		fmt.Println("error in parsing POSTGRES_PORT. Setting to 5432")
 		panic(err)
 	}
 	if port < 1000 {
-		panic(fmt.Errorf("Invalid port number: %d", port))
+		panic(fmt.Errorf("invalid port number: %d", port))
 	}
 
 	return port
