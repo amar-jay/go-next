@@ -1,6 +1,11 @@
 package user
 
-import "github.com/jinzhu/gorm"
+import (
+	"errors"
+
+	"github.com/amar-jay/go-api-boilerplate/gql/gen"
+	"github.com/jinzhu/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -10,4 +15,24 @@ type User struct {
 	Password string `gorm:"NOT NULL"`
 	Role string `gorm:"NOT_NULL;size:255;DEFAULT:'standard'"`
 	Active bool `gorm:"NOT NULL; DEFAULT: true"`
+}
+
+func (u *User) ToGenUser() *gen.User {
+  return &gen.User{
+    FirstName: u.FirstName,
+    LastName: u.LastName,
+    Email: u.Email,
+    Role: u.Role,
+    Active: u.Active,
+    ID: int(u.ID),
+  }
+}
+
+func ToUser(g any) (*User, error) {
+
+  u, ok := g.(*User);
+  if !ok {
+    return nil, errors.New("invalid type: expected *User")
+  }
+  return u, nil;
 }

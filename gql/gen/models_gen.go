@@ -2,9 +2,21 @@
 
 package gen
 
-type RegisterLogin struct {
+type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Message struct {
+	Text string `json:"text"`
+	Code string `json:"code"`
+}
+
+type RegisterInput struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 type RegisterLoginOutput struct {

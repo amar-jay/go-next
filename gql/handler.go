@@ -1,7 +1,11 @@
 package gql
 
 import (
-	"github.com/99designs/gqlgen/handler"
+	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	hand "github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/amar-jay/go-api-boilerplate/gql/gen"
 	"github.com/amar-jay/go-api-boilerplate/services/authservice"
 	"github.com/amar-jay/go-api-boilerplate/services/emailservice"
@@ -20,8 +24,10 @@ func GraphQLHandler(us userservice.UserService, as authservice.AuthService, es e
     },
   }
 
+  // NewExecutableSchema and Config are in the generated.go file
+  // Resolver is in the resolver.go file
   exec := gen.NewExecutableSchema(conf)
-  h := handler.GraphQL(exec)
+  h := handler.NewDefaultServer(exec)
   return func(ctx *gin.Context) {
     h.ServeHTTP(ctx.Writer, ctx.Request)
   }
@@ -30,8 +36,13 @@ func GraphQLHandler(us userservice.UserService, as authservice.AuthService, es e
 
 // PlaygroundHandler defined the playground handler to expose
 func PlaygroundHandler(path string) gin.HandlerFunc {
-  h := handler.Playground("GraphQL  Playground", path)
+  h := playground.Handler("GraphQL", path)
   return func(ctx *gin.Context) {
     h.ServeHTTP(ctx.Writer, ctx.Request)
   }
+}
+
+func httpPlayground(path string) http.HandlerFunc {
+   h := hand.Playground("GraphQL  Playground", path)
+  return h;
 }

@@ -17,8 +17,19 @@ type RegisterLoginOutput {
   user: User!
 }
 
+type Message {
+  text: String!
+  code: String!
+}
 #-- input types --
-input RegisterLogin {
+input RegisterInput{
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput{
   email: String!
   password: String!
 }
@@ -33,13 +44,14 @@ input UpdateUser {
 #-- queries and mutations--
 type Query {
   user(id: Int!): User!
-  userProfile: User!
+  users: [User!]!
 }
 
 type Mutation {
-  register(input: RegisterLogin!): RegisterLoginOutput!
-  login(input: RegisterLogin!): RegisterLoginOutput!
-  updateUser(input: UpdateUser!): User!
-  forgotPassword(email: String!): Boolean!
+  register(input: RegisterInput!): RegisterLoginOutput!
+  login(input: LoginInput!): RegisterLoginOutput!
+  updateUser(input: UpdateUser!): Message!
+  forgotPassword(email: String!): Message!
   resetPassword(token: String!, password: String!): RegisterLoginOutput!
 }
+

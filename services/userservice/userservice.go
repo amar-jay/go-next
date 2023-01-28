@@ -3,12 +3,12 @@ package userservice
 import (
 	"errors"
 	"regexp"
+	"strings"
 
-	"github.com/amar-jay/go-api-boilerplate/common/hmachash"
-	rdms "github.com/amar-jay/go-api-boilerplate/common/randomstring"
 	"github.com/amar-jay/go-api-boilerplate/domain/user"
 	pswd_repo "github.com/amar-jay/go-api-boilerplate/repositories/password_reset"
 	"github.com/amar-jay/go-api-boilerplate/repositories/user_repo"
+	"github.com/amar-jay/go-api-boilerplate/utils/hash"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,7 +19,7 @@ type UserService interface {
 		Register(user *user.User) error
 		Update(user *user.User) error
 		GetUserByID(id uint) (*user.User, error)
-		GetUserByEmail(email string) (*user.User, error)
+		Login(input *user.User) (*user.User, error)
 		GetUsers() ([]*user.User, error)
 }
 
@@ -27,23 +27,21 @@ type userService struct {
 	pepper string
 	Repo user_repo.Repo
 	pswd pswd_repo.Repo
-	rs rdms.RandomString
 	hmac hmachash.HMAC 
 }
 
-func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, rs rdms.RandomString, hmac hmachash.HMAC, pepper string ) UserService {
+func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, hmac hmachash.HMAC, pepper string ) UserService {
 
 	return &userService{
 		Repo: repo,
 		pepper: pepper,
 		pswd: pswd,
-		rs: rs,
 		hmac: hmac,
 	}
 }
 
 func (us *userService) Register(u *user.User) error {
-	hashed, err := us.HashPassword(u.Password)
+	hashed, err := us.hashPassword(u.Password)
 	if err != nil {
 		return err
 	}
@@ -77,7 +75,7 @@ func (us *userService) GetUsers() ([]*user.User, error) {
 		return nil, err
 	}
 
-	if users == nil {
+	if len(users) < 1 {
 		return nil, errors.New("there is no user") 
 	}
 
@@ -98,15 +96,16 @@ func (us *userService) GetUserByID(id uint) (*user.User, error) {
 
 }
 
-func (us *userService) GetUserByEmail(email string) (*user.User, error) {
-	if email == "" {
-		return nil, errors.New("email params is required")
-	}
-	if err := validateEmail(email); err != nil {
+func (us *userService) Login(input *user.User) (*user.User, error) {
+	if err := validateEmail(input.Email); err != nil {
 		return nil, err 
 	}
 
-	user, err := us.Repo.GetUserByEmail(email)
+	if err := validatePassword(input.Password); err != nil {
+		return nil, err 
+	}
+
+	user, err := us.Repo.GetUserByEmail(input.Email)
 
 	if err != nil {
 		return nil, err
@@ -120,7 +119,7 @@ func (us *userService) GetUserByEmail(email string) (*user.User, error) {
 */
 
 // HashPassword hashes the password using bcrypt
-func (us *userService) HashPassword(password string) (string, error) {
+func (us *userService) hashPassword(password string) (string, error) {
 	pswdAndPepper := password + us.pepper
 	hashed, err := bcrypt.GenerateFromPassword([]byte(pswdAndPepper), bcrypt.DefaultCost)
 	if err != nil {
@@ -150,6 +149,15 @@ func validateEmail(email string) error {
 		return nil
 }
 
+// validate password 
+func validatePassword(password string) error {
+  valid := len(password) > 8 && strings.ToUpper(password) != password && strings.ToLower(password) != password;
+
+  if !valid {
+	return errors.New("invalid password entered")
+  }
+  return nil
+}
 // validate validates the user (password, email, name)
 func (us *userService) validate(input *user.User) error {
   // validate email
@@ -157,18 +165,13 @@ func (us *userService) validate(input *user.User) error {
     return err
   }
   // validate password
-    passwordRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{8,}$");
-    if !passwordRegex.MatchString(input.Password) {
-      return errors.New("invalid password, password must be at least 8 characters long")
-    }
+  if err := validatePassword(input.Password); err != nil {
+    return err
+  }
   // if user already exists
-  if _, err := us.GetUserByEmail(input.Email); err == nil {
+  if _, err := us.Login(input); err == nil {
     return errors.New("user already exists")
   }
 
-  // if user is not active
-  if !input.Active {
-    return errors.New("user is not active")
-  }
   return nil
 }

@@ -1,7 +1,7 @@
 package mailgunclient
 
 import (
-	"github.com/amar-jay/go-api-boilerplate/config"
+	"github.com/amar-jay/go-api-boilerplate/utils/config"
 	"github.com/mailgun/mailgun-go/v4"
 )
 

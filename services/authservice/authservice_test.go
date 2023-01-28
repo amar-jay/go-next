@@ -2,28 +2,20 @@ package authservice
 
 import (
 	"testing"
-	"time"
 
 	"github.com/amar-jay/go-api-boilerplate/domain/user"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestToken(t *testing.T) {
   t.Run("generating Token", func(t *testing.T){ 
   u := &user.User{
-    gorm.Model{
-      ID: uint(1),
-      CreatedAt: time.Now(),
-      UpdatedAt: time.Now(),
-      DeletedAt: nil,
-    },
-    "",
-    "",
-    "me@themanan.me",
-    "",
-    "",
-    true,
+      FirstName: "Amar",
+      LastName: "Jay",
+      Password: "password",
+      Email: "me@themanan.me",
+      Role: "admin",
+      Active: true,
   }
 
   svc := NewAuthService("secret")

@@ -6,7 +6,7 @@ import "github.com/gin-gonic/gin"
 type Response struct {
   Code  int     `json:"code"`
   Msg   string  `json:"message"`
-  Data  interface{}  `json:"data"`
+  Data  any     `json:"data"`
 }
 
 // send an http response

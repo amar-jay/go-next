@@ -13,10 +13,10 @@ This project is under construction at the moment 🚧
 - [x] REST API
 - [ ] gRPC
 - [ ] Swagger
-- [ ] JWT Authentication - **In progress**
+- [ ] JWT Authentication
 - [x] GORM (Golang DB ORM) - PostgreSQL
-- [ ] Docker
-- [ ] Unit Tests
+- [x] Docker
+- [x] Unit Tests
 - [ ] Email Notification
 - [ ] Authentication with Email,Google, Facebook, Twitter
 - [ ] CI - Github Actions

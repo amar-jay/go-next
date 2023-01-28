@@ -56,7 +56,7 @@ type ErrorOutput struct {
 type UserController interface {
   Register(*gin.Context)
   Update(*gin.Context)
-  login(ctx *gin.Context, u *user.User) error
+  login(ctx *gin.Context,u *user.User, message string) error
   Login(ctx *gin.Context)
   GetUserByID(*gin.Context)
   GetUsers(*gin.Context)
@@ -91,8 +91,9 @@ func (userctrl *userController) Login(ctx *gin.Context) {
     return
   }
 
+  u := userctrl.login_input_to_User(input)
   // TODO: Get User from Database  
-  user, err := userctrl.us.GetUserByEmail(input.Email)
+  user, err := userctrl.us.Login(&u)
   if err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
     return
@@ -105,7 +106,7 @@ func (userctrl *userController) Login(ctx *gin.Context) {
     return
   }
   // TODO: Login 
-  if err := userctrl.login(ctx, user); err != nil {
+  if err := userctrl.login(ctx, user, "user logged in successfully"); err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
     return
   }
@@ -119,27 +120,24 @@ func (userctrl *userController) Register(ctx *gin.Context) {
     return
   } 
 
-  u := userctrl.inputToUser(userInput)
-
+  u := userctrl.register_input_to_User(userInput)
   // create a user
   if err := userctrl.us.Register(&u); err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
     return
   }
 
-  // TODO: send a welcome message
+  // TODO: send a welcome message by mail
   if err := userctrl.es.Welcome(u.Email); err != nil {
     HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
     return
   }
 
   //  login the user
-  if err := userctrl.login(ctx, &u); err != nil {
+  if err := userctrl.login(ctx, &u, "Sign up successfully"); err != nil {
     HttpResponse(ctx, http.StatusMethodNotAllowed, err.Error(), nil)
     return
   }
-
-  HttpResponse(ctx, http.StatusOK, "Logged In Successfully", nil)
 }
 
 func (userctrl *userController) Update(ctx *gin.Context) {
@@ -253,8 +251,17 @@ func (userctrl *userController) GetUserByID(ctx *gin.Context) {
 * --- Other methods
 */
 
-func (userctrl *userController) inputToUser(input RegisterUserInput) user.User {
+// converts user input to user model
+func (userctrl *userController) login_input_to_User(input LoginUserInput) user.User {
 
+  return user.User{
+    Email:    input.Email,
+    Password: input.Password,
+  }
+}
+
+// converts user input to user model
+func (userctrl *userController) register_input_to_User(input RegisterUserInput) user.User {
 
   return user.User{
     FirstName: input.FirstName,
@@ -277,14 +284,14 @@ func (userctrl *userController) mapToUserOutput(input *user.User) *UserOutput {
     Role: input.Role,
   }
 }
- func (userctrl *userController) login(ctx *gin.Context, u *user.User) error {
+ func (userctrl *userController) login(ctx *gin.Context, u *user.User, message string) error {
    token, err := userctrl.as.IssueToken(*u)
    if err != nil {
      return err
    }
-   userOutput := userctrl.mapToUserOutput(u)
-   out := gin.H{"token": token, "user": userOutput}
-   HttpResponse(ctx, http.StatusOK, "ok", out)
+ //  userOutput := userctrl.mapToUserOutput(u)
+   out := gin.H{"token": token}
+   HttpResponse(ctx, http.StatusOK, message, out)
    return nil
  }
 

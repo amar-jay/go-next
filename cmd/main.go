@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	//"github.com/99designs/gqlgen/graphql/playground"
-	_ "github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/jinzhu/gorm"
@@ -15,18 +16,18 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 
-	"github.com/amar-jay/go-api-boilerplate/common/hmachash"
-	"github.com/amar-jay/go-api-boilerplate/common/randomstring"
-	"github.com/amar-jay/go-api-boilerplate/config"
 	"github.com/amar-jay/go-api-boilerplate/controllers"
 	"github.com/amar-jay/go-api-boilerplate/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/gql"
+	"github.com/amar-jay/go-api-boilerplate/gql/gen"
 	"github.com/amar-jay/go-api-boilerplate/middleware"
 	"github.com/amar-jay/go-api-boilerplate/repositories/password_reset"
 	"github.com/amar-jay/go-api-boilerplate/repositories/user_repo"
 	"github.com/amar-jay/go-api-boilerplate/services/authservice"
 	"github.com/amar-jay/go-api-boilerplate/services/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/services/userservice"
+	"github.com/amar-jay/go-api-boilerplate/utils/config"
+	hmachash "github.com/amar-jay/go-api-boilerplate/utils/hash"
 )
 
 
@@ -42,14 +43,21 @@ func main() {
     log.Fatalf("Error setting trusted proxies: %v", err)
   }
 
-  // swagger url - http://localhost:8080/swagger/index.html
-  router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+  router.Use(gin.Logger())
+  router.Use(gin.Recovery())
+  router.Use(middleware.GinContextToMiddleWare())
 
+/*
+
+*/
   // load env file
   if err := godotenv.Load(); err != nil {
 	  log.Fatal("Error in loading env files. $PORT must be set")
   }
   config := config.GetConfig()
+
+  // swagger url - http://localhost:8080/swagger/index.html
+  router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
   db, err := gorm.Open(
 	  config.Postgres.GetConnectionInfo(),
@@ -87,10 +95,10 @@ func main() {
    */
   userrepo := user_repo.NewUserRepo(db)
   pswdrepo := password_reset.CreatePasswordReserRepo(db)
-  randomstr := randomstring.CreateRandomString()
-  hash := hmachash.NewHMAC("dumb ass")
-  userService := userservice.NewUserService(userrepo, pswdrepo, randomstr, hash, config.Pepper)
-  authService := authservice.NewAuthService(config.JWTSecret)
+//  randomstr := randomstring.CreateRandomString()
+  hash := hmachash.NewHMAC(config.HashKey)
+  userService := userservice.NewUserService(userrepo, pswdrepo, hash, config.Pepper)
+  authService := authservice.NewAuthService(config.HashKey)
   emailService := emailservice.NewEmailService()
 
   /**
@@ -103,18 +111,21 @@ func main() {
   *  ----- Routing -----
    */
 
-  // srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-  //playground := handler.Playground("GraphQL playground", "/query")
+   srv := handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &gql.Resolver{}}))
+  playground := playground.Handler("GraphQL playground", "/query")
+  http.Handle("/", playground)
+  http.Handle("/query", srv)
   router.GET("/graphql",  gql.PlaygroundHandler("/query"))
-  router.POST("/query", func(_ *gin.Context) {
-	  middleware.SetUserContext(config.JWTSecret)
-	  gql.GraphQLHandler(userService, authService, emailService)
-  })
+  router.POST("/query", gql.GraphQLHandler(userService, authService, emailService))
+    //func(_ *gin.Context) {
+	//  middleware.SetUserContext(config.JWTSecret)
+  //})
   // http.Handle("/query", srv)
 
   auth := router.Group("/auth")
 
   auth.POST("/register", userController.Register)
+  auth.POST("/update", userController.Update)
   auth.POST("/login", userController.Login)
   auth.POST("/forgot-password", userController.ForgotPassword)
   auth.POST("/update-password", userController.ResetPassword)
@@ -135,5 +146,6 @@ func main() {
   // Run server
   log.Printf("Running on http://localhost:%d/ ", config.Port)
   port := fmt.Sprintf(":%d", config.Port)
-  log.Fatal(router.Run(port))
+ // log.Fatal(router.Run(port))
+  log.Fatal(http.ListenAndServe(port, nil))
 }

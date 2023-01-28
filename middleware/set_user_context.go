@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/amar-jay/go-api-boilerplate/controllers"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/dgrijalva/jwt-go.v3"
 )
@@ -11,7 +12,10 @@ import (
 // set contex when user has a valid token
 func SetUserContext(secret string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token, _ := stripBearer(ctx.Request.Header.Get("Authorization")) 
+		token, err := stripBearer(ctx.Request.Header.Get("Authorization")) 
+		if err != nil {
+		    controllers.HttpResponse(ctx, http.StatusUnauthorized, "invalid header", nil)
+		}
 
 		tokenClaims, _ := jwt.ParseWithClaims(
 			token,

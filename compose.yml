@@ -1,40 +1,67 @@
 # Use postgres/example user/password credentials
-version: "1.0"
+version: "3.8"
 
 services:
 
   adminer:
     image: adminer
     restart: always
+    depends_on:
+      - pg
     ports:
       - 8080:8080
-    networks: ['pg']
+    networks: ['api']
+
+  redis:
+    image: redis:6-alpine
+    restart: always
 
   pg:
     image: postgres:latest
     container_name: pg
     restart: always
+    env_file: 
+      - .env.local
     environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: db
-    networks: ['pg']
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5432:5432
+    depends_on:
+      - redis
+    volumes: 
+      - database:/var/lib/postgresql/data
+    networks: 
+      - api
 
 
   api:
     container_name: api
-    build: .
+    restart: always
+    env_file: ./.env.local
+    build: 
+       context: ./
+       target: production
     ports:
       - 4000:4000
     depends_on:
-      - pg 
-    links:
       - pg
-      - surrealdb
-    networks: ['pg']
+      - redis
+    environment:
+      - POSTGRES_HOST=pg
+    links:
+       - pg
+#    volumes:
+#        - api:/usr/app
+#    networks: 
+#        - api
+
+volumes:
+  database:
+  # api:
 
 networks:
-  pg:
+  api:
     driver: bridge
+
 

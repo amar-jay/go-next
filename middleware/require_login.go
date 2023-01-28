@@ -20,7 +20,7 @@ type Claim struct {
 
 // remove Bearer from "Authorization " token
 func stripBearer(token string) (string, error) {
-  if len(token) > 6 && strings.ToLower(token[0:7]) == "bearer " {
+  if len(token) > 6 && strings.ToLower(token[0:7]) == "Bearer " {
     return token[7:], nil
   }
 

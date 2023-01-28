@@ -17,20 +17,17 @@ type Claim struct {
 }
 
 
-// AuthService interface
+// for auth service - ( issueing and parsing tokens)
 type AuthService interface {
-	// TODO: change userid to user.User
-	IssueToken(userID user.User) (string, error)
+	IssueToken(user user.User) (string, error)
 	ParseToken(token string) (*Claim, error)
 }
 
-// Private authService struct
 type authService struct {
 	jwtSecret string
 }
 
 func NewAuthService(jwtSecret string) AuthService {
-	// TODO: remember to cross check return type
 	return &authService{
 		jwtSecret: jwtSecret,
 	}
