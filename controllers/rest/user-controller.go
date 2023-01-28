@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/services/authservice"
 	"github.com/amar-jay/go-api-boilerplate/services/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/services/userservice"

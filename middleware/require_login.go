@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/amar-jay/go-api-boilerplate/controllers"
+	controllers "github.com/amar-jay/go-api-boilerplate/controllers/rest"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/dgrijalva/jwt-go.v3"
 )

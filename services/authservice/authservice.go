@@ -4,7 +4,7 @@ import (
 	"time"
 	
 	"gopkg.in/dgrijalva/jwt-go.v3"
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 )
 
 // resolving circular import was done by repetition of Claim

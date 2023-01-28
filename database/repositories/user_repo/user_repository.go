@@ -1,7 +1,7 @@
 package user_repo
 
 import (
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"gorm.io/gorm"
 )
 

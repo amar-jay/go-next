@@ -5,7 +5,7 @@ import (
 	"errors"
 	// "errors"
 
-	"github.com/amar-jay/go-api-boilerplate/gql/gen"
+	"github.com/amar-jay/go-api-boilerplate/controllers/gql/gen"
 )
 
 func (r *queryResolver) Users(ctx context.Context) ([]*gen.User, error) {

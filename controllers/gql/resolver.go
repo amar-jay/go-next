@@ -4,7 +4,7 @@ package gql
 
 import (
 
-	"github.com/amar-jay/go-api-boilerplate/gql/gen"
+	"github.com/amar-jay/go-api-boilerplate/controllers/gql/gen"
 	"github.com/amar-jay/go-api-boilerplate/services/authservice"
 	"github.com/amar-jay/go-api-boilerplate/services/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/services/userservice"

@@ -3,7 +3,7 @@ package authservice
 import (
 	"testing"
 
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/stretchr/testify/assert"
 )
 

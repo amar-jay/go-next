@@ -1,7 +1,7 @@
 package password_reset
 
 import (
-	pswd "github.com/amar-jay/go-api-boilerplate/domain/passwordreset"
+	pswd "github.com/amar-jay/go-api-boilerplate/database/domain/passwordreset"
 	"gorm.io/gorm"
 )
 

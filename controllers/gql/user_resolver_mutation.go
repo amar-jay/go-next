@@ -3,8 +3,8 @@ package gql
 import (
 	"context"
 	// "errors"
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
-	"github.com/amar-jay/go-api-boilerplate/gql/gen"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
+	"github.com/amar-jay/go-api-boilerplate/controllers/gql/gen"
 )
 
 // // foo

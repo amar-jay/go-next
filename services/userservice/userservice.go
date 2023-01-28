@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/amar-jay/go-api-boilerplate/domain/user"
-	pswd_repo "github.com/amar-jay/go-api-boilerplate/repositories/password_reset"
-	"github.com/amar-jay/go-api-boilerplate/repositories/user_repo"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
+	pswd_repo "github.com/amar-jay/go-api-boilerplate/database/repositories/password_reset"
+	"github.com/amar-jay/go-api-boilerplate/database/repositories/user_repo"
 	"github.com/amar-jay/go-api-boilerplate/utils/hash"
 
 	"golang.org/x/crypto/bcrypt"
