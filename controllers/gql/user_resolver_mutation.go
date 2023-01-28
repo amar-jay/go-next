@@ -23,10 +23,29 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, email string) (*g
 
 // register user and send welcome email
 func (r *mutationResolver) Register(ctx context.Context, login gen.RegisterInput) (*gen.RegisterLoginOutput, error) {
-  u := r.UserService.Register(user.ToUser(login))
+  user, err := user.ToUser(&login)
+  if err != nil {
+    return nil, err
+  }
+  // register user in db
+  if err = r.UserService.Register(user); err != nil {
+    return nil, err
+  }
+
+  // send welcome email
+  if err := r.EmailService.Welcome(user.Email); err != nil {
+    return nil, err
+  }
+
+  // generate token
+   token, err := r.AuthService.IssueToken(*user)
+   if err != nil {
+     return nil, err
+   }
+
   return &gen.RegisterLoginOutput{
-    Token: "not implemented",
-    User: &gen.User{},
+    Token: token,
+    User: user.ToGql(),
   }, nil
 }
 

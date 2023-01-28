@@ -41,6 +41,11 @@ func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, hmac hmachash.HMAC
 }
 
 func (us *userService) Register(u *user.User) error {
+	if err := us.validate(u); err != nil {
+	  return err
+	}
+
+	// hashing password
 	hashed, err := us.hashPassword(u.Password)
 	if err != nil {
 		return err
@@ -48,9 +53,6 @@ func (us *userService) Register(u *user.User) error {
 
 	u.Password = hashed
 
-	if err := us.validate(u); err != nil {
-	  return err
-	}
 	return us.Repo.CreateUser(u)
 	//return fmt.Errorf("USER SERVICE ERROR: Register not implemented")
 }
@@ -151,10 +153,10 @@ func validateEmail(email string) error {
 
 // validate password 
 func validatePassword(password string) error {
-  valid := len(password) > 8 && strings.ToUpper(password) != password && strings.ToLower(password) != password;
+  invalid := len(password) < 8 || strings.ToUpper(password) == password || strings.ToLower(password) == password;
 
-  if !valid {
-	return errors.New("invalid password entered")
+  if invalid {
+	return errors.New("invalid password entered, Must contain at least 8 characters, 1 uppercase, 1 lowercase")
   }
   return nil
 }

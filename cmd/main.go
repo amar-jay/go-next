@@ -111,7 +111,11 @@ func main() {
   *  ----- Routing -----
    */
 
-   srv := handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &gql.Resolver{}}))
+   srv := handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &gql.Resolver{
+    UserService: userService,
+    AuthService: authService,
+    EmailService: emailService,
+  }}))
   playground := playground.Handler("GraphQL playground", "/query")
   http.Handle("/", playground)
   http.Handle("/query", srv)
