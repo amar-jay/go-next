@@ -27,6 +27,7 @@ import (
 	"github.com/amar-jay/go-api-boilerplate/services/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/services/userservice"
 	"github.com/amar-jay/go-api-boilerplate/utils/config"
+	"github.com/amar-jay/go-api-boilerplate/infra/redis"
 	hmachash "github.com/amar-jay/go-api-boilerplate/utils/hash"
 )
 
@@ -81,6 +82,11 @@ func main() {
   //	defer db.Close()
   fmt.Println("Database migrated successfully")
 
+  err = redis.Set("test", "test");
+  if err != nil {
+    panic(err)
+  }
+  //redis.Get("test")
   router.GET("/", func(c *gin.Context) {
 	  // If the client is 192.168.1.2, use the X-Forwarded-For
 	  // header to deduce the original client IP from the trust-

@@ -34,7 +34,7 @@ func GetConfig() Config {
     Mailgun: GetMailgunConfig(),
     Postgres: GetPostgresConfig(),
     FromEmail: os.Getenv("EMAIL_FROM"),
-    Port: getPort("PORT"),
+    Port: getPort("PORT", 4000),
     HashKey: os.Getenv("HASH_KEY"),
     JWTSecret: os.Getenv("JWT_SECRET"),
   }

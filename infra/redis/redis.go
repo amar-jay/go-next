@@ -12,8 +12,8 @@ import (
 
 // connect to redis server
 func Dial() (redis.Conn, error) {
-  var config = config.GetConfig()
-  conn, err := redis.Dial("tcp", config.Redis.Address)
+  var config = config.GetRedisConfig()
+  conn, err := redis.Dial("tcp", config.Address)
 
   if err != nil {
     return nil, err

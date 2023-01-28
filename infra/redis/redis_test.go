@@ -1,4 +1,4 @@
-package config
+package redis
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	. "github.com/agiledragon/gomonkey/v2"
+	"github.com/amar-jay/go-api-boilerplate/utils/config"
 	"github.com/gomodule/redigo/redis"
 	redigomock "github.com/rafaeljusto/redigomock/v3"
 )
@@ -19,14 +20,11 @@ const (
 )
 
 var (
-  c = RedisConfig{
+  c = config.RedisConfig{
     Address: mock_addr,
   }
 )
 func Test_redisDial(t *testing.T) {
-  c := RedisConfig{
-    Address: mock_addr,
-  }
 	tests := []struct {
 		name    string
 		want    redis.Conn
@@ -53,7 +51,7 @@ func Test_redisDial(t *testing.T) {
 					return redigoConn, nil
 				})
 			}
-			got, err := c.Dial()
+			got, err := Dial()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("redisDial() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -107,7 +105,7 @@ func TestSetKeyValue(t *testing.T) {
 			}
 			redigoConn.Command("SET", tt.args.key, string(b)).Expect("something")
 
-			if err := c.Set(tt.args.key, tt.args.data); (err != nil) != tt.wantErr {
+			if err := Set(tt.args.key, tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("SetKeyValue() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if patches != nil {
@@ -152,7 +150,7 @@ func TestGetKeyValue(t *testing.T) {
 			}
 			redigoConn.Command("GET", tt.args.key).Expect(tt.want)
 
-			got, err := c.Get(tt.args.key)
+			got, err := Get(tt.args.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetKeyValue() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -35,20 +35,20 @@ func (c *PostgresConfig) GetConnectionInfo() gorm.Dialector {
 func GetPostgresConfig() PostgresConfig {
 	return PostgresConfig{
 		Host:     os.Getenv("POSTGRES_HOST"),
-		Port:     getPort("POSTGRES_PORT"),
+		Port:     getPort("POSTGRES_PORT", 5432),
 		User:     os.Getenv("POSTGRES_USER"),
 		Password: os.Getenv("POSTGRES_PASSWORD"),
 		Database: os.Getenv("POSTGRES_DB"),
 	}
 }
 
-func getPort(input string) int {
+func getPort(input string, def uint) int {
 	port, err := strconv.Atoi(os.Getenv(input))
 	if err != nil {
-		fmt.Println("error in parsing POSTGRES_PORT. Setting to 5432")
+		fmt.Printf("error in parsing %s. Setting to default %d", input, def)
 		panic(err)
 	}
-	if port < 1000 {
+	if port < 0 {
 		panic(fmt.Errorf("invalid port number: %d", port))
 	}
 
