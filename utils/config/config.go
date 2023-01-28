@@ -5,7 +5,7 @@ import (
 )
 const (
   // AppName is the name of the app
-  appName = "go-api-boilerplate"
+  AppName = "go-auth"
   production = "production"
 )
 
@@ -19,10 +19,11 @@ type Config struct {
   JWTSecret string        `env:"JWT_SECRET"`
   Mailgun   MailgunConfig `json:"mailgun"`
   Postgres  PostgresConfig `json:"postgres"`
+  Redis	    RedisConfig	  `json:"redis"`
 }
 
 // Check if it is in production
-func (c Config) isProduction() bool {
+func (c Config) IsProduction() bool {
   return c.Env == production
 }
 

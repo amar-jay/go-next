@@ -43,6 +43,8 @@ func main() {
     log.Fatalf("Error setting trusted proxies: %v", err)
   }
 
+
+
   router.Use(gin.Logger())
   router.Use(gin.Recovery())
   router.Use(middleware.GinContextToMiddleWare())
@@ -56,6 +58,9 @@ func main() {
   }
   config := config.GetConfig()
 
+  if config.IsProduction() {
+    gin.SetMode(gin.ReleaseMode)
+  }
   // swagger url - http://localhost:8080/swagger/index.html
   router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
