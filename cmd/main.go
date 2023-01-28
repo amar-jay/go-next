@@ -82,11 +82,16 @@ func main() {
   //	defer db.Close()
   fmt.Println("Database migrated successfully")
 
+  // TODO: remove this, meant for testing
   err = redis.Set("test", "test");
   if err != nil {
     panic(err)
   }
-  //redis.Get("test")
+  res, err := redis.Get("test")
+  if err != nil {
+    panic(err)
+  }
+  fmt.Printf("Redis test: %s %s", res)
   router.GET("/", func(c *gin.Context) {
 	  // If the client is 192.168.1.2, use the X-Forwarded-For
 	  // header to deduce the original client IP from the trust-
