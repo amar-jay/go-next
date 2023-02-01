@@ -49,8 +49,6 @@ services:
     depends_on:
       - pg
       - redis
-    environment:
-      - POSTGRES_HOST=pg
     links:
        - pg
 #    volumes:
