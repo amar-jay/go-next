@@ -10,3 +10,4 @@ const Error = () => {
     </Layout>
 	)
 }
+export default Error;
