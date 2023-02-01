@@ -5,7 +5,7 @@
   "bugs": {
     "url": "https://github.com/amar-jay/.../issues"
   },
-  "homepage": "https://...",
+  "homepage": "https://themanan.me",
   "scripts": {
     "dev": "next",
     "dev:turbo": "next --turbo --show-all",
