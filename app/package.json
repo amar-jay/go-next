@@ -18,7 +18,9 @@
     "Amar Jay <me@themanan.me>"
   ],
   "dependencies": {
+    "@monaco-editor/react": "^4.4.6",
     "jotai": "^2.0.0",
+    "monaco-editor": "^0.34.1",
     "next": "latest",
     "next-auth": "latest",
     "nodemailer": "^6",

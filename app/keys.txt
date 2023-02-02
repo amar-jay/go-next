@@ -1,2 +1,0 @@
-#GOOGLE_ID=448985769609-uhc25ejcgccdnruts2jeou2hkv8d097s.apps.googleusercontent.com
-#GOOGLE_SECRET=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
