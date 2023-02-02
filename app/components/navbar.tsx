@@ -40,7 +40,7 @@ const NavBar: React.FC = () => {
           htmlFor="file-input"
           className="inline-flex w-full justify-center rounded-lg bg-slate-600 bg-opacity-20 px-4 py-2 text-xl font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         >
-          📂<span className="md:inline-block hidden text-md">docs</span>
+          📂
         </label>
         <input
           id="file-input"

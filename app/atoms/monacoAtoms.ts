@@ -5,7 +5,7 @@ import { languageList, langExt } from './data';
 
 // Create your atoms and derivatives
 export const langAtom = atom(languageList[0].name);
-const selectedLangAtom = atom(languageList[0].name);
+//const selectedLangAtom = atom(languageList[0].name);
 export const editorLang = atom((get) => get(langAtom).toLowerCase());
 export const filteredLangList = languageList.map(e => e.name);
 

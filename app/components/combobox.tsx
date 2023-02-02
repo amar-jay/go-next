@@ -1,9 +1,7 @@
-import { Fragment, useState } from "react";
-import Icon from "@mdi/react";
-import { mdiCheck, mdiSwapVertical } from "@mdi/js";
+import { Fragment } from "react";
 import { Combobox, Transition } from "@headlessui/react";
-import { ValueOf, languageList, LanguageType, Lang } from "../atoms/data";
-import { langAtom, selectedLangAtom } from "../atoms/monacoAtoms";
+import { languageList, LanguageType, Lang } from "../atoms/data";
+import { langAtom } from "../atoms/monacoAtoms";
 import { useAtom } from "jotai";
 
 export default () => {
@@ -17,10 +15,10 @@ export default () => {
           <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
             <Combobox.Input
               className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
-              displayValue={(s:Lang) => s}
-              onChange={(event) =>{
+              displayValue={(s:Lang["name"]) => s}
+              onChange={(event:any) =>{
                 if (event.target.value){
-                  if (selected in filteredLang){
+                  if (lang in filteredLang){
                     setLang(event.target.value as LanguageType)
                   }
                 }
@@ -28,10 +26,7 @@ export default () => {
               }
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <Icon
-                path={mdiSwapVertical}
-                className="text-slate-300 hover:text-slate-600 w-5"
-              />
+	      hhh
             </Combobox.Button>
           </div>
           <Transition
@@ -72,10 +67,7 @@ export default () => {
                               active ? "text-white" : "text-teal-600"
                             }`}
                           >
-                            <Icon
-                              path={mdiCheck}
-                              className="pr-3 text-slate-600 hover:text-slate-300 w-8"
-                            />
+			      xxx
                           </span>
                         )}
                       </>
