@@ -11,10 +11,13 @@ export const filteredLangList = languageList.map(e => e.name);
 
 export const setLang = (ext: ExtensionType| undefined, setLang: (x:LanguageType) => void) => {
   if (!ext || ext.length < 1 || !langExt[ext]){
-    return new Error(`Extension "${ext}" does not exist`);
+    setLang("PlainText");
+    return;
+    //return new Error(`Extension "${ext}" does not exist`);
   }
   const lang = langExt[ext];
   setLang(lang);
+  return;
 }
 
 

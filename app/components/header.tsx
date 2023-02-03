@@ -2,6 +2,44 @@ import Link from "next/link"
 import { signIn, signOut, useSession } from "next-auth/react"
 import styles from "./header.module.css"
 
+interface Route {
+  href: `/${string}`
+  name: string
+}
+const routes:Route[] = [
+  {
+    name: "Home",
+    href: "/"
+  },
+  {
+    name: "Editor",
+    href: "/editor"
+  },
+  {
+    name: "Client",
+    href: "/client"
+  },
+  {
+    name: "Server",
+    href: "/server"
+  },
+  {
+    name: "Protected",
+    href: "/protected"
+  },
+  {
+    name: "API",
+    href: "/api-example"
+  },
+  {
+    name: "Admin",
+    href: "/admin"
+  },
+  {
+    name: "Me",
+    href: "/me"
+  }
+]
 // The approach used in this component shows how to build a sign in and sign out
 // component that works on pages which support both client and server side
 // rendering, and avoids any flash incorrect content on initial page load.
@@ -66,27 +104,12 @@ export default function Header() {
       </div>
       <nav>
         <ul className={styles.navItems}>
-          <li className={styles.navItem}>
-            <Link href="/">Home</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/client">Client</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/server">Server</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/protected">Protected</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/api-example">API</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/admin">Admin</Link>
-          </li>
-          <li className={styles.navItem}>
-            <Link href="/me">Me</Link>
-          </li>
+	  {routes.map((e, idx) => (
+	    <li key={idx} className={styles.navItem}>
+	      <Link href={e.href}>{e.name}</Link>
+	      {" | "}
+	    </li>
+	  ))}
         </ul>
       </nav>
     </header>

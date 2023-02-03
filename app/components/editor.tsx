@@ -47,9 +47,8 @@ const handleEditorDidMount: OnMount= (e, _) => {
   }
   return (
     <>
-      <h1 className="text-slate-700 text-4xl ml-3">Editor</h1>
         <h2 className="text-lg text-extrabold text-slate-400 ml-10">
-	    Langugage: {lang[0].toUpperCase() + lang.slice(1,)}
+	    Language: {lang[0].toUpperCase() + lang.slice(1,)}
         </h2>
       <MonacoEditor
 	className="w-screen h-[75vh]"
@@ -63,6 +62,7 @@ const handleEditorDidMount: OnMount= (e, _) => {
 	  fontSize: 18
 	}}
 	onMount={handleEditorDidMount}
+	defaultLanguage={"plaintext"}
       />
 
     </>

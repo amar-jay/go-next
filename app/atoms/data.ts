@@ -7,7 +7,9 @@ export interface Lang {
   id: number, 
 };
 
-export const langExt = { js: 'Javascript',
+export const langExt = { 
+  txt: 'PlainText',
+  js: 'Javascript',
   ts: 'Typescript',
   py: 'Python',
   rs: 'Rust',
@@ -23,6 +25,7 @@ export const langExt = { js: 'Javascript',
 } as const;
 
 export const languageList:Lang[] = [
+  { id: 0, name: 'PlainText' },
   { id: 1, name: 'Javascript' },
   { id: 2, name: 'Typescript' },
   { id: 3, name: 'HTML' },
