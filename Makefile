@@ -1,7 +1,11 @@
+.: clean build compose-local test compose-local-logs-api start
+
 build:
 	go build -o bin/ ./cmd/...
 test:
 	go test -v ./...
+start:
+	./bin/cmd
 run:
 	go run ./cmd/...
 clean:
@@ -31,4 +35,3 @@ compose-prod-restart:
 compose-prod-logs:
 	docker-compose -f compose.yml logs -f
 
-.PHONY: build test clean run compose-local compose-local-down compose-local-restart compose-local-logs compose-local-logs-api compose-prod compose-prod-down compose-prod-restart compose-prod-logs

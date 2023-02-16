@@ -11,27 +11,32 @@ model:
   package: gen 
 
 resolver: 
-  filename: controllers/gql/resolver.go
-  type: Resolver
-  package: gql
+ filename: controllers/gql/resolver.go
+ type: Resolver
+ package: gql
 
-autobind: []
+autobind: 
+  - 'github.com/amar-jay/go-api-boilerplate/controllers/gql/models'
 
 # resolver:
 #   layout: follow-schema
-#   dir: graph
-#   package: graph
+#   dir: controllers/gql
+#   package: gql 
 
+models:
+  UUID:
+    model:
+      - github.com/amar-jay/go-api-boilerplate/controllers/gql/models.UUID
 
-# models:
-#   ID:
-#     model:
-#       - github.com/99designs/gqlgen/graphql.ID
-#       - github.com/99designs/gqlgen/graphql.Int
-#       - github.com/99designs/gqlgen/graphql.Int64
-#       - github.com/99designs/gqlgen/graphql.Int32
-#   Int:
-#     model:
-#       - github.com/99designs/gqlgen/graphql.Int
-#       - github.com/99designs/gqlgen/graphql.Int64
-#       - github.com/99designs/gqlgen/graphql.Int32
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32

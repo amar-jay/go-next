@@ -322,7 +322,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `# GraphQL schema example
+	{Name: "../schema/schema.graphql", Input: `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
@@ -408,7 +408,7 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	var arg0 LoginInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐLoginInput(ctx, tmp)
+		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐLoginInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -423,7 +423,7 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	var arg0 RegisterInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -462,7 +462,7 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var arg0 UpdateUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUpdateUser(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUpdateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -654,7 +654,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -714,7 +714,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -774,7 +774,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -834,7 +834,7 @@ func (ec *executionContext) _Mutation_forgotPassword(ctx context.Context, field 
 	}
 	res := resTmp.(*Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -894,7 +894,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -954,7 +954,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1022,7 +1022,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1251,7 +1251,7 @@ func (ec *executionContext) _RegisterLoginOutput_user(ctx context.Context, field
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_RegisterLoginOutput_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4073,16 +4073,16 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐLoginInput(ctx context.Context, v interface{}) (LoginInput, error) {
+func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐLoginInput(ctx context.Context, v interface{}) (LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
 	return ec._Message(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4092,16 +4092,16 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterInput(ctx context.Context, v interface{}) (RegisterInput, error) {
+func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterInput(ctx context.Context, v interface{}) (RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRegisterLoginOutput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v RegisterLoginOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNRegisterLoginOutput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v RegisterLoginOutput) graphql.Marshaler {
 	return ec._RegisterLoginOutput(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v *RegisterLoginOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v *RegisterLoginOutput) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4126,16 +4126,16 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUpdateUser(ctx context.Context, v interface{}) (UpdateUser, error) {
+func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUpdateUser(ctx context.Context, v interface{}) (UpdateUser, error) {
 	res, err := ec.unmarshalInputUpdateUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4159,7 +4159,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4179,7 +4179,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
