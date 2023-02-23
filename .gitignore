@@ -1,6 +1,9 @@
 *.env
 .DS_Store
-
+.env
+.env.local
+.env.prod
+!.env.example
 #Log
 *.log
 .debug
