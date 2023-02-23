@@ -14,19 +14,16 @@ type Claim struct {
 	Email string `json:"email"`
 	ID    int    `json:"id"`
 	jwt.StandardClaims
-
 }
-
 
 // remove Bearer from "Authorization " token
 func stripBearer(token string) (string, error) {
-  if len(token) > 6 && strings.ToLower(token[0:7]) == "Bearer " {
-    return token[7:], nil
-  }
+	if len(token) > 6 && strings.ToLower(token[0:7]) == "Bearer " {
+		return token[7:], nil
+	}
 
-  return token, nil
+	return token, nil
 }
-
 
 // Checks if user is has a valid token
 func RequireTobeloggedIn(jwtSecret string) gin.HandlerFunc {
@@ -38,9 +35,9 @@ func RequireTobeloggedIn(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
-		tokenClaims, err := jwt.ParseWithClaims(token, &Claim{}, func(t *jwt.Token) (interface{}, error) { return []byte(jwtSecret), nil})
+		tokenClaims, err := jwt.ParseWithClaims(token, &Claim{}, func(t *jwt.Token) (interface{}, error) { return []byte(jwtSecret), nil })
 		if err != nil {
-			controllers.HttpResponse(ctx, http.StatusUnauthorized, err.Error(),nil)
+			controllers.HttpResponse(ctx, http.StatusUnauthorized, err.Error(), nil)
 		}
 		if tokenClaims != nil {
 			claims, ok := tokenClaims.Claims.(*Claim)

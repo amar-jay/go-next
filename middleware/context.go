@@ -4,20 +4,18 @@ import (
 	"context"
 	"errors"
 
-
 	"github.com/amar-jay/go-api-boilerplate/utils/config"
 	"github.com/gin-gonic/gin"
 )
 
 // moving context to GinContextKey
 func GinContextToMiddleWare() gin.HandlerFunc {
-  return func(c *gin.Context) {
-    ctx := context.WithValue(c.Request.Context(), config.GinContextKey(), c)
-    c.Request = c.Request.WithContext(ctx)
-    c.Next()
-  }
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), config.GinContextKey(), c)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	}
 }
-
 
 // recover gin.Context from context.Context
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {

@@ -2,9 +2,9 @@ package authservice
 
 import (
 	"time"
-	
-	"gopkg.in/dgrijalva/jwt-go.v3"
+
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
+	"gopkg.in/dgrijalva/jwt-go.v3"
 )
 
 // resolving circular import was done by repetition of Claim
@@ -13,9 +13,7 @@ type Claim struct {
 	Email string `json:"email"`
 	ID    int    `json:"id"`
 	jwt.StandardClaims
-
 }
-
 
 // for auth service - ( issueing and parsing tokens)
 type AuthService interface {
@@ -43,23 +41,22 @@ func (auth *authService) IssueToken(u user.User) (string, error) {
 		int(u.ID),
 		jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
-			Issuer: "Undefined Issuer",
+			Issuer:    "Undefined Issuer",
 		},
+	}
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return tokenClaims.SignedString([]byte(auth.jwtSecret))
 }
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) 
-	return tokenClaims.SignedString([]byte(auth.jwtSecret)) 
-}
-
 
 // parse token
 func (auth *authService) ParseToken(token string) (*Claim, error) {
 	tokenClaims, err := jwt.ParseWithClaims(
-	token,
-	&Claim{},
-	func(token *jwt.Token) (interface{}, error) {
-		return []byte(auth.jwtSecret), nil
-	},
-)
+		token,
+		&Claim{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(auth.jwtSecret), nil
+		},
+	)
 
 	if tokenClaims != nil {
 		claims, ok := tokenClaims.Claims.(*Claim)
@@ -67,7 +64,6 @@ func (auth *authService) ParseToken(token string) (*Claim, error) {
 			return claims, nil
 		}
 	}
-
 
 	return nil, err
 }

@@ -14,35 +14,35 @@ import (
 )
 
 type UserService interface {
-		ComparePassword(inputpswd string, dbpswd string) error
-		validate(input *user.User) error
-		Register(user *user.User) error
-		Update(user *user.User) error
-		GetUserByID(id uint) (*user.User, error)
-		Login(input *user.User) (*user.User, error)
-		GetUsers() ([]*user.User, error)
+	ComparePassword(inputpswd string, dbpswd string) error
+	validate(input *user.User) error
+	Register(user *user.User) error
+	Update(user *user.User) error
+	GetUserByID(id uint) (*user.User, error)
+	Login(input *user.User) (*user.User, error)
+	GetUsers() ([]*user.User, error)
 }
 
 type userService struct {
 	pepper string
-	Repo user_repo.Repo
-	pswd pswd_repo.Repo
-	hmac hmachash.HMAC 
+	Repo   user_repo.Repo
+	pswd   pswd_repo.Repo
+	hmac   hmachash.HMAC
 }
 
-func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, hmac hmachash.HMAC, pepper string ) UserService {
+func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, hmac hmachash.HMAC, pepper string) UserService {
 
 	return &userService{
-		Repo: repo,
+		Repo:   repo,
 		pepper: pepper,
-		pswd: pswd,
-		hmac: hmac,
+		pswd:   pswd,
+		hmac:   hmac,
 	}
 }
 
 func (us *userService) Register(u *user.User) error {
 	if err := us.validate(u); err != nil {
-	  return err
+		return err
 	}
 
 	// hashing password
@@ -59,8 +59,7 @@ func (us *userService) Register(u *user.User) error {
 
 /**
 * ----- UPDATE METHODS ---
-*/
-
+ */
 
 func (us *userService) Update(u *user.User) error {
 	return us.Repo.Update(u)
@@ -68,7 +67,7 @@ func (us *userService) Update(u *user.User) error {
 
 /**
 * ----- GET METHODS ---
-*/
+ */
 
 func (us *userService) GetUsers() ([]*user.User, error) {
 	users, err := us.Repo.GetUsers()
@@ -78,7 +77,7 @@ func (us *userService) GetUsers() ([]*user.User, error) {
 	}
 
 	if len(users) < 1 {
-		return nil, errors.New("there is no user") 
+		return nil, errors.New("there is no user")
 	}
 
 	return users, nil
@@ -100,11 +99,11 @@ func (us *userService) GetUserByID(id uint) (*user.User, error) {
 
 func (us *userService) Login(input *user.User) (*user.User, error) {
 	if err := validateEmail(input.Email); err != nil {
-		return nil, err 
+		return nil, err
 	}
 
 	if err := validatePassword(input.Password); err != nil {
-		return nil, err 
+		return nil, err
 	}
 
 	user, err := us.Repo.GetUserByEmail(input.Email)
@@ -116,9 +115,10 @@ func (us *userService) Login(input *user.User) (*user.User, error) {
 	return user, nil
 
 }
+
 /**
 * -- Other
-*/
+ */
 
 // HashPassword hashes the password using bcrypt
 func (us *userService) hashPassword(password string) (string, error) {
@@ -129,7 +129,6 @@ func (us *userService) hashPassword(password string) (string, error) {
 	}
 	return string(hashed), nil
 }
-
 
 // ComparePassword compares the password with the hash
 func (us *userService) ComparePassword(inputpswd string, dbpswd string) error {
@@ -142,38 +141,39 @@ func (us *userService) ComparePassword(inputpswd string, dbpswd string) error {
 
 // validateEmail validates the email
 func validateEmail(email string) error {
-	 emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-	  if !emailRegex.MatchString(email) {
-			return errors.New("invalid email param entered")
-		}
+	if !emailRegex.MatchString(email) {
+		return errors.New("invalid email param entered")
+	}
 
-		return nil
+	return nil
 }
 
-// validate password 
+// validate password
 func validatePassword(password string) error {
-  invalid := len(password) < 8 || strings.ToUpper(password) == password || strings.ToLower(password) == password;
+	invalid := len(password) < 8 || strings.ToUpper(password) == password || strings.ToLower(password) == password
 
-  if invalid {
-	return errors.New("invalid password entered, Must contain at least 8 characters, 1 uppercase, 1 lowercase")
-  }
-  return nil
+	if invalid {
+		return errors.New("invalid password entered, Must contain at least 8 characters, 1 uppercase, 1 lowercase")
+	}
+	return nil
 }
+
 // validate validates the user (password, email, name)
 func (us *userService) validate(input *user.User) error {
-  // validate email
-  if err := validateEmail(input.Email); err != nil {
-    return err
-  }
-  // validate password
-  if err := validatePassword(input.Password); err != nil {
-    return err
-  }
-  // if user already exists
-  if _, err := us.Login(input); err == nil {
-    return errors.New("user already exists")
-  }
+	// validate email
+	if err := validateEmail(input.Email); err != nil {
+		return err
+	}
+	// validate password
+	if err := validatePassword(input.Password); err != nil {
+		return err
+	}
+	// if user already exists
+	if _, err := us.Login(input); err == nil {
+		return errors.New("user already exists")
+	}
 
-  return nil
+	return nil
 }

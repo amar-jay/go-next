@@ -5,10 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
-
 
 // PostgresConfig is the config for postgres
 type PostgresConfig struct {
@@ -18,6 +17,7 @@ type PostgresConfig struct {
 	Password string `env:"POSTGRES_PASSWORD"`
 	Database string `env:"POSTGRES_DB"`
 }
+
 //db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 // Dialect returns the dialect for postgres
 func (c *PostgresConfig) Config() *gorm.Config {
@@ -28,7 +28,7 @@ func (c *PostgresConfig) Config() *gorm.Config {
 func (c *PostgresConfig) GetConnectionInfo() gorm.Dialector {
 	fmt.Println(c.Host, c.Port, c.User, c.Password, c.Database)
 	dns := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Password, c.Database)
-	return postgres.Open(dns) 
+	return postgres.Open(dns)
 }
 
 // GetPostgresConfig returns the postgres config

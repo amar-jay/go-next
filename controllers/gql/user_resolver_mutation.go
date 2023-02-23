@@ -2,6 +2,8 @@ package gql
 
 import (
 	"context"
+	"errors"
+
 	// "errors"
 	"github.com/amar-jay/go-api-boilerplate/controllers/gql/gen"
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
@@ -49,8 +51,12 @@ func (r *mutationResolver) Register(ctx context.Context, login gen.RegisterInput
 
 // To login a user and return a token
 func (r *mutationResolver) Login(ctx context.Context, login gen.LoginInput) (*gen.RegisterLoginOutput, error) {
+	token, ok := ctx.Value("token").(string)
+	if !ok {
+		return nil, errors.New("token not found")
+	}
 	return &gen.RegisterLoginOutput{
-		Token: "foo",
+		Token: token,
 		User:  &gen.User{},
 	}, nil
 }

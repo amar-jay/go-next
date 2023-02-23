@@ -2,13 +2,13 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import FacebookProvider from "next-auth/providers/facebook"
 import GithubProvider from "next-auth/providers/github"
-import TwitterProvider from "next-auth/providers/twitter"
+//import TwitterProvider from "next-auth/providers/twitter"
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   // https://next-auth.js.org/configuration/providers/oauth
   providers: [
     /* EmailProvider({
@@ -49,11 +49,31 @@ export const authOptions: NextAuthOptions = {
     colorScheme: "light",
   },
   callbacks: {
-    async jwt({ token }) {
+    /*
+    async signIn({user, account, profile}) {
+      if (!profile) {
+        return false 
+      }
+      if (account?.provider === "facebook" || "google" || "github") {
+        user.name = profile.name
+        user.email = profile.email
+        user.image = profile.image
+        return true
+      }
+      return false
+    },
+    */
+    async jwt({ token, user }) {
       token.userRole = "admin"
+      console.log("user from jwt: \n", JSON.stringify(user))
+
       return token
     },
+    async session({ session, user}) {
+      console.log("user from session: \n", JSON.stringify(user))
+      return session
+    }
   },
-}
+} satisfies NextAuthOptions;
 
 export default NextAuth(authOptions)

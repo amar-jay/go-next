@@ -7,23 +7,23 @@ import (
 )
 
 type HMAC interface {
-  Hash(input string) string
-} 
+	Hash(input string) string
+}
 
 type hm struct {
-  hmac hash.Hash
+	hmac hash.Hash
 }
 
 func NewHMAC(key string) HMAC {
-  h := hmac.New(sha256.New, []byte(key))
+	h := hmac.New(sha256.New, []byte(key))
 
-  return hm{
-    hmac: h,
-  }
+	return hm{
+		hmac: h,
+	}
 }
 
 // hash returns the HMAC hash of the input string
 func (h hm) Hash(input string) string {
-  //return "not implemented"
-  panic("not implemented")
+	//return "not implemented"
+	panic("not implemented")
 }

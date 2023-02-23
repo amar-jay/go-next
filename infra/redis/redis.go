@@ -3,58 +3,81 @@ package redis
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
-	"github.com/gomodule/redigo/redis"
 	"github.com/amar-jay/go-api-boilerplate/utils/config"
+	"github.com/gomodule/redigo/redis"
 )
 
+type redisConn struct {
+	addr string
+	conn *redis.Conn
+}
+
+func Init(args ...string) *redisConn {
+	var addr string
+	var config = config.GetRedisConfig()
+	switch {
+	case len(args) > 1:
+		panic("only address should be provided")
+	case len(args) == 1:
+		addr = args[0]
+	default:
+		addr = config.Address
+	}
+
+	return &redisConn{
+		addr: addr,
+		conn: nil,
+	}
+}
 
 // connect to redis server
-func Dial() (redis.Conn, error) {
-  var config = config.GetRedisConfig()
-  conn, err := redis.Dial("tcp", config.Address)
+func (r *redisConn) Dial() error {
+	conn, err := redis.Dial("tcp", r.addr)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return err
+	}
 
-  return conn, nil
+	r.conn = &conn
+	return nil
 }
 
 type Value any
 
 // set key value pair
-func Set(key string, val Value) error {
-  conn, err := Dial()
-  if err != nil {
-    msg := fmt.Sprintf("error in redis connection: %v", err)
-    return errors.New(msg)
-  }
+func (r *redisConn) Set(key string, val Value) error {
+	conn := *r.conn
 
-  // json serialization
-  b, err := json.Marshal(val)
+	// json serialization
+	b, err := json.Marshal(val)
 
-  if err != nil {
-    return err;
-  }
+	if err != nil {
+		return err
+	}
 
-  _, err = conn.Do("SET", key, string(b))
-  return err
-
+	_, err = conn.Do("SET", key, string(b))
+	return err
 }
 
-func Get(key string) (any, error) {
-  conn, err := Dial()
-  if err != nil {
-    msg := fmt.Sprintf("error in redis connection: %v", err)
-    return nil, errors.New(msg)
-  }
-  if err != nil {
-    return nil, err;
-  }
+// get valu e and store value in pointer
+func (r *redisConn) Get(key string, val any) error {
+	if r.conn == nil {
+		msg := errors.New("error in redis connection: Ought to dial first")
+		return msg
+	}
 
-  res, err := conn.Do("GET", key)
-  return res, err
+	conn := *r.conn
+
+	res, err := conn.Do("GET", key)
+	if err != nil {
+		return err
+	}
+	bytes, ok := res.([]byte)
+	if !ok {
+		return errors.New("unable to convert response to bytes")
+	}
+	err = json.Unmarshal(bytes, &val)
+	return err
 
 }
