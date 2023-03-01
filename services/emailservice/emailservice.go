@@ -17,7 +17,7 @@ func NewEmailService() EmailService {
 	}
 }
 
-//Welcome email
+// Welcome email
 func (s *emailService) Welcome(toEmail string) error {
 	// TODO: implement email notification service
 	//return errors.New("email service not implemented")

@@ -18,7 +18,7 @@ type PostgresConfig struct {
 	Database string `env:"POSTGRES_DB"`
 }
 
-//db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 // Dialect returns the dialect for postgres
 func (c *PostgresConfig) Config() *gorm.Config {
 	return &gorm.Config{}
