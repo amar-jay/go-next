@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/amar-jay/go-api-boilerplate/controllers/gql/gen"
+	"github.com/amar-jay/go-api-boilerplate/controller/gql/gen"
 	"github.com/jinzhu/gorm"
 )
 

@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/amar-jay/go-api-boilerplate/utils/config"
+	"github.com/amar-jay/go-api-boilerplate/pkg/config"
 	"github.com/google/uuid"
 	"testing"
 )

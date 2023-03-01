@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/amar-jay/go-api-boilerplate/utils/config"
+	"github.com/amar-jay/go-api-boilerplate/pkg/config"
 	"github.com/gomodule/redigo/redis"
 )
 

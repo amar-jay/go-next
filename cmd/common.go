@@ -1,10 +1,8 @@
-package main
+package cmd 
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/amar-jay/go-api-boilerplate/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,16 +18,5 @@ func init() {
 	}
 }
 
-func main() {
-	fmt.Println("Starting server...")
-	err := router.SetTrustedProxies([]string{"192.168.1.2", "::1"})
-
-	if err != nil {
-		log.Fatalf("Error setting trusted proxies: %v", err)
-	}
-
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(middleware.GinContextToMiddleWare())
-
+func Main() {
 }
