@@ -1,13 +1,13 @@
 target: api 
 .PHONY: build test start run generate  compose-prod compose-prod-down compose-prod-logs compose-prod-restart compose-local compose-local-down compose-local-logs compose-local-restart
 
-api: build compose-local test start
+api: build compose-local test
 frontend:
 	cd app && pnpm run dev
 build:
 	go build -o bin/ ./cmd/...
 test:
-	go test -v ./...
+	go test ./...
 start:
 	./bin/api
 run:

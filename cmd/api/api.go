@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	//"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/jinzhu/gorm"
@@ -17,26 +16,71 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/amar-jay/go-api-boilerplate/controller/gql"
-	"github.com/amar-jay/go-api-boilerplate/controller/gql/gen"
 	controllers "github.com/amar-jay/go-api-boilerplate/controller/rest"
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/password_reset"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/user_repo"
 	"github.com/amar-jay/go-api-boilerplate/infra/redis"
 	"github.com/amar-jay/go-api-boilerplate/middleware"
+	"github.com/amar-jay/go-api-boilerplate/pkg/config"
+	hmachash "github.com/amar-jay/go-api-boilerplate/pkg/hash"
 	"github.com/amar-jay/go-api-boilerplate/service/authservice"
 	"github.com/amar-jay/go-api-boilerplate/service/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/service/userservice"
-	"github.com/amar-jay/go-api-boilerplate/pkg/config"
-	hmachash "github.com/amar-jay/go-api-boilerplate/pkg/hash"
 )
 
 var (
 	router = gin.Default()
 )
 
+func redis_test() {
+
+	// TODO: remove this, meant for testing
+	conn := redis.Init()
+	err := conn.Dial()
+	if err != nil {
+		panic(err)
+	}
+
+	err = conn.Set("test", "test")
+	if err != nil {
+		panic(err)
+	}
+
+	var res string
+	err = conn.Get("test", &res)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("Redis test: %s", res)
+}
+
+func other_routers(config config.Config, userController controllers.UserController) {
+	auth := router.Group("/auth")
+
+	auth.POST("/register", userController.Register)
+	auth.POST("/update", userController.Update)
+	auth.POST("/login", userController.Login)
+	auth.POST("/forgot-password", userController.ForgotPassword)
+	auth.POST("/update-password", userController.ResetPassword)
+
+	user := router.Group("/users")
+
+	user.GET("/", userController.GetUsers)
+	user.GET("/:id", userController.GetUserByID)
+
+	//  accounts and profiles
+	account := router.Group("/account")
+	account.Use(middleware.RequireTobeloggedIn(config.JWTSecret))
+	{
+		account.GET("/profile", userController.GetProfile)
+		account.PUT("/profile", userController.Update)
+	}
+}
+
 func main() {
-	fmt.Println("Starting server...")
+	var port string;
+	log.Println("Starting server...")
 	err := router.SetTrustedProxies([]string{"192.168.1.2", "::1"})
 
 	if err != nil {
@@ -47,14 +91,19 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middleware.GinContextToMiddleWare())
 
-	/*
 
-	 */
 	// load env file
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error in loading env files. $PORT must be set")
+		log.Fatal("Error in loading env files. Default $PORT must be set")
 	}
-	config := config.GetConfig()
+
+	config := config.GetConfig();
+	//port = strconv.Itoa(config.Port);
+	if len(os.Args) > 1 {
+		port = os.Args[1];
+	} else {
+		port = strconv.Itoa(config.Port);
+	}
 
 	if config.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
@@ -76,34 +125,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//	defer db.Close()
-	fmt.Println("Database migrated successfully")
+	log.Println("Database migrated successfully")
 
-	// TODO: remove this, meant for testing
-	conn := redis.Init()
-	err = conn.Dial()
-	if err != nil {
-		panic(err)
-	}
-
-	err = conn.Set("test", "test")
-	if err != nil {
-		panic(err)
-	}
-
-	var res string
-	err = conn.Get("test", &res)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Redis test: %s", res)
+	redis_test();
 	router.GET("/", func(c *gin.Context) {
-		// If the client is 192.168.1.2, use the X-Forwarded-For
-		// header to deduce the original client IP from the trust-
-		// worthy parts of that header.
-		// Otherwise, simply return the direct client IP
-		fmt.Printf("ClientIP: %s\n", c.ClientIP())
-		c.JSON(http.StatusOK, gin.H{"Amar": "Jay", "clientIP": c.ClientIP()})
+		log.Printf("ClientIP: %s\n", c.ClientIP())
+		c.Redirect(http.StatusMovedPermanently, "/graphql")
+//		c.JSON(http.StatusOK, gin.H{"Amar": "Jay", "clientIP": c.ClientIP()})
 	})
 
 	// Testing the database
@@ -116,61 +144,30 @@ func main() {
 	 */
 	userrepo := user_repo.NewUserRepo(db)
 	pswdrepo := password_reset.CreatePasswordReserRepo(db)
-	//  randomstr := randomstring.CreateRandomString()
 	hash := hmachash.NewHMAC(config.HashKey)
 	userService := userservice.NewUserService(userrepo, pswdrepo, hash, config.Pepper)
 	authService := authservice.NewAuthService(config.HashKey)
 	emailService := emailservice.NewEmailService()
 
 	/**
-	 * ----- Controllers -----
+	 ----- Controllers -----
 	 */
 
 	userController := controllers.NewUserController(userService, authService, emailService)
 
 	/**
-	 *  ----- Routing -----
+	  ----- Routing -----
 	 */
-
-	srv := handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &gql.Resolver{
-		UserService:  userService,
-		AuthService:  authService,
-		EmailService: emailService,
-	}}))
-	playground := playground.Handler("GraphQL playground", "/query")
-	http.Handle("/", playground)
-	http.Handle("/query", srv)
 	router.GET("/graphql", gql.PlaygroundHandler("/query"))
 	router.POST("/query", gql.GraphQLHandler(userService, authService, emailService),
-		func(_ *gin.Context) {
+		func(c *gin.Context) {
 			middleware.SetUserContext(config.JWTSecret)
 		})
-	// http.Handle("/query", srv)
 
-	auth := router.Group("/auth")
-
-	auth.POST("/register", userController.Register)
-	auth.POST("/update", userController.Update)
-	auth.POST("/login", userController.Login)
-	auth.POST("/forgot-password", userController.ForgotPassword)
-	auth.POST("/update-password", userController.ResetPassword)
-
-	user := router.Group("/users")
-
-	user.GET("/", userController.GetUsers)
-	user.GET("/:id", userController.GetUserByID)
-
-	//  accounts and profiles
-	account := router.Group("/account")
-	account.Use(middleware.RequireTobeloggedIn(config.JWTSecret))
-	{
-		account.GET("/profile", userController.GetProfile)
-		account.PUT("/profile", userController.Update)
-	}
+	other_routers(config, userController);
 
 	// Run server
-	log.Printf("Running on http://localhost:%d/\n", config.Port)
-	port := fmt.Sprintf(":%d", config.Port)
-	log.Fatal(router.Run(port))
-	//log.Fatal(http.ListenAndServe(port, nil))
+	log.Printf("Running on http://localhost:%s/\n", port)
+	err = router.Run(":" + port)
+	log.Fatal(err)
 }
