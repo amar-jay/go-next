@@ -1,34 +1,12 @@
 # Go Api Boilerplate
-A go API stack with rest, graphql and grpc integration meant for fast and quick backend build.  
 
-## Guide
-
-This project is under construction at the moment 🚧
+A Nextjs with golang example. This is just an attempt of how it should be done. And must be inspected before taking to production
 
 
-## Features to be added
+## Purpose
+To allow authentication from nextjs' next-auth to golang service
+This is just an adapter. 
 
-- [ ] CLI
-- [x] GraphQL API
-- [x] REST API
-- [ ] gRPC
-- [ ] Swagger
-- [ ] JWT Authentication
-- [x] GORM (Golang DB ORM) - PostgreSQL
-- [x] Docker
-- [x] Unit Tests
-- [ ] Email Notification
-- [ ] Authentication with Email,Google, Facebook, Twitter
-- [ ] CI - Github Actions
-
-
-## Resources
-
-- [gin](https://github.com/gin-gonic/gin)
-- [gorm](https://github.com/jinzhu/gorm)
-- [graphql-gqlgen](https://github.com/99designs/gqlgen)
-- [testify](https://github.com/stretchr/testify)
-- [jwt-go](https://gopkg.in/dgrijalva/jwt-go.v3)
 
 ## License
 
@@ -36,4 +14,4 @@ This project is under construction at the moment 🚧
 
 ## Contributing
 
-You are welcome to contribute to this project. Please read the [contributing guidelines](CONTRIBUTING.md) before contributing.
+You are welcome to contribute to this project. Please create a pull request first in order to commit. Or suggestions are welcome as well. 
