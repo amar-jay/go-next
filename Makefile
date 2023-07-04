@@ -36,4 +36,6 @@ compose-prod-restart:
 	docker-compose -f compose.yml restart
 compose-prod-logs:
 	docker-compose -f compose.yml logs -f
+env-push:
+	node v/pages/srcipt/env_push.js
 
