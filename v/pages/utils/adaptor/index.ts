@@ -1,4 +1,4 @@
-import { Adapter, DefaultAdapter } from "next-auth/adapters"
+import { Adapter, AdapterUser, DefaultAdapter } from "next-auth/adapters"
 import { redirect } from "next/dist/server/api-utils";
 import { NextResponse } from "next/server";
 
@@ -27,16 +27,29 @@ const request = (url: string) => {
 const A = (url: string): Adapter => {
   return {
     async createUser(user) {
-		console.log(JSON.stringify(user))
-      return {} as any
+      const u = user as AdapterUser
+      u.id = "1"
+		console.log(JSON.stringify(u))
+      return u
     },
     async getUser(id) {
-		console.log(JSON.stringify(id))
-      return {} as any
+      const u = {} as AdapterUser
+      u.id = "1"
+      u.name = "test"
+      u.email = "me@me.me"
+      u.image = "https://www.gravatar.com/avatar"
+      console.log(JSON.stringify({...u, id}))
+      return u
+
     },
     async getUserByEmail(email) {
-		console.log(JSON.stringify(email))
-      return {} as any
+      const u = {} as AdapterUser
+      u.id = "1"
+      u.name = "test"
+      u.email = "me@me.me"
+      u.image = "https://www.gravatar.com/avatar"
+      console.log(JSON.stringify({...u, email}))
+      return u
     },
     async getUserByAccount({ providerAccountId, provider, ...rest }) {
 		console.log(JSON.stringify({providerAccountId, provider, ...rest}))
