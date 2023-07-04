@@ -1,8 +1,30 @@
-import { Adapter, AdapterUser, DefaultAdapter } from "next-auth/adapters"
+import { Adapter, AdapterAccount, AdapterSession, AdapterUser, DefaultAdapter, VerificationToken } from "next-auth/adapters"
 import { redirect } from "next/dist/server/api-utils";
 import { NextResponse } from "next/server";
 
 
+const users: AdapterUser[] = []
+var accounts: AdapterAccount[] = []
+const sessions: AdapterSession[] = []
+const removeAcc = (acc: {provider: string; providerAccountId: string}) => {
+  const i = accounts.findIndex(a => a.provider === acc.provider && a.providerAccountId === acc.providerAccountId)
+  accounts = [...accounts.slice(0, i), ...accounts.slice(i + 1)]
+  return true
+}
+
+const getSession = async (sessionToken: string) => {
+  const session = sessions.find(s => s.sessionToken === sessionToken)
+  const user = users.find(u => u.id === session?.userId)
+  return {session, user}
+}
+
+const getAcc = (acc: {provider: string; providerAccountId: string}) => {
+  const account = accounts.find(a => a.provider === acc.provider && a.providerAccountId === acc.providerAccountId)
+  const user = users.find(u => u.id === account?.userId)
+  return user
+}
+const get = (id: string) => users.find(u => u.id === id)
+const email = (email: string) => users.find(u => u.email === email)
 const request = (url: string) => {
 	const req = fetch(url)
 	.then(res => res.json())
@@ -15,11 +37,10 @@ const request = (url: string) => {
 				NextResponse.redirect('/404')
         return
 			default:
+        console.log("error occured in request: [url]", url, "[response]", r)
 				NextResponse.redirect('/error')
         return
 		}
-			return r
-		
 	})
 
 	return req;
@@ -29,71 +50,113 @@ const A = (url: string): Adapter => {
     async createUser(user) {
       const u = user as AdapterUser
       u.id = "1"
-		console.log(JSON.stringify(u))
+      users.push(u)
+      console.log("from adapter[ createUser]", JSON.stringify(u))
       return u
     },
     async getUser(id) {
-      const u = {} as AdapterUser
-      u.id = "1"
-      u.name = "test"
-      u.email = "me@me.me"
-      u.image = "https://www.gravatar.com/avatar"
-      console.log(JSON.stringify({...u, id}))
-      return u
-
-    },
-    async getUserByEmail(email) {
-      const u = {} as AdapterUser
-      u.id = "1"
-      u.name = "test"
-      u.email = "me@me.me"
-      u.image = "https://www.gravatar.com/avatar"
-      console.log(JSON.stringify({...u, email}))
+      const u = get(id)
+      console.log("from adapter[ getUser ]", JSON.stringify(u))
+      if (!u) return null
       return u
     },
-    async getUserByAccount({ providerAccountId, provider, ...rest }) {
-		console.log(JSON.stringify({providerAccountId, provider, ...rest}))
-      return {} as any
+    async getUserByEmail(e) {
+      const u = email(e)
+      console.log("from adapter[ getUserByEmail ]", JSON.stringify({...u, e}))
+      if (!u) return null
+      return u
+    },
+    async getUserByAccount({ providerAccountId, provider }) {
+      const u = getAcc({ providerAccountId, provider })
+    console.log("from adapter[ getUserByAccount ]", JSON.stringify({providerAccountId, provider, }), "\n[ user ]", JSON.stringify(u))
+    if (!u) return null
+    switch (provider){
+      case "github":
+        // const e = await request(`https://api.github.com/users/${providerAccountId}`)
+        // providerAccountId = e.login
+        return {
+          email: "me@me.me",
+          emailVerified: new Date(),
+          name: "me",
+          id: "1",
+          image: "https://avatars.githubusercontent.com/u/1?v=4"
+        } satisfies AdapterUser
+      default:
+        return u
+    }
     },
     async updateUser(user) {
-		console.log(JSON.stringify(user))
-      return {} as any
+      console.log("from adapter[ updateUser ]", JSON.stringify(user))
+      return {
+        ...user as Required<AdapterUser>,
+        id: "1"
+      }
     },
     async deleteUser(userId) {
-		console.log(JSON.stringify(userId))
+      console.log("from adapter[ deleteUser ]", JSON.stringify(userId))
       return
     },
     async linkAccount(account) {
-		console.log(JSON.stringify(account))
+      accounts.push(account)
+      console.log("from adapter[ linkAccount ]", JSON.stringify(account))
       return
     },
     async unlinkAccount({ providerAccountId, provider, ...rest }) {
-		console.log(JSON.stringify({providerAccountId, provider, ...rest}))
+      removeAcc({ providerAccountId, provider })
+      console.log("from adapter[ unlinkAccount ]", JSON.stringify({providerAccountId, provider, ...rest}))
       return
     },
     async createSession({ sessionToken, userId, expires, ...rest }) {
-		console.log(JSON.stringify({ sessionToken, userId, expires, ...rest}))
-      return {} as any
+      sessions.push({ sessionToken, userId, expires, ...rest })
+    console.log("from adapter[ createSession ]", JSON.stringify({ sessionToken, userId, expires, ...rest}))
+    return {
+      sessionToken,
+      userId,
+      expires,
+      ...rest
+    }
     },
     async getSessionAndUser(sessionToken) {
-		console.log(JSON.stringify(sessionToken))
-      return {} as any
+     const {session, user} =  await getSession(sessionToken)
+    console.log("from adapter[ getSessionAndUser ]", JSON.stringify(sessionToken), "\n[ session ]", JSON.stringify(session), "\n[ user ]", JSON.stringify(user))
+    if (!session || !user) return null
+      return {
+        session,
+        user
+      }  
     },
     async updateSession({ sessionToken, ...rest }) {
-		console.log(JSON.stringify({sessionToken, ...rest}))
-      return {} as any
+      console.log("from adapter[ updateSession ]", JSON.stringify({ sessionToken, ...rest}))
+      return {
+        sessionToken,
+        expires: new Date(),
+        userId: "1",
+      } satisfies AdapterSession
     },
     async deleteSession(sessionToken) {
-		console.log(JSON.stringify(sessionToken))
-      return
+      console.log("from adapter[ deleteSession ]", JSON.stringify(sessionToken))
+      return {
+        sessionToken,
+        expires: new Date(),
+        userId: "1",
+      } satisfies AdapterSession
     },
     async createVerificationToken({ identifier, expires, token, ...rest }) {
-		console.log(JSON.stringify({ identifier, expires, token, ...rest }))
-      return {} as any
+      console.log("from adapter[ createVerificationToken ]", JSON.stringify({ identifier, expires, token, ...rest}))
+      return {
+        identifier,
+        token,
+        expires,
+      } satisfies VerificationToken
     },
     async useVerificationToken({ identifier, token, ...rest }) {
-		console.log(JSON.stringify({ identifier, token, ...rest }))
-      return {} as any
+      console.log("from adapter[ useVerificationToken ]", JSON.stringify({ identifier, token, ...rest}))
+      return {
+        identifier,
+        token,
+        expires: new Date(),
+        ...rest,
+      } satisfies VerificationToken
     },
   } 
 }
