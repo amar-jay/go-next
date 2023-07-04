@@ -74,20 +74,22 @@ const A = (url: string): Adapter => {
       const u = getAcc({ providerAccountId, provider })
     console.log("from adapter[ getUserByAccount ]", JSON.stringify({providerAccountId, provider, }), "\n[ user ]", JSON.stringify(u))
     if (!u) return null
-    switch (provider){
-      case "github":
-        // const e = await request(`https://api.github.com/users/${providerAccountId}`)
-        // providerAccountId = e.login
-        return {
-          email: "me@me.me",
-          emailVerified: new Date(),
-          name: "me",
-          id: "1",
-          image: "https://avatars.githubusercontent.com/u/1?v=4"
-        } satisfies AdapterUser
-      default:
-        return u
-    }
+    // TODO: for different providers
+    // switch (provider){
+    //   case "github":
+    //     // const e = await request(`https://api.github.com/users/${providerAccountId}`)
+    //     // providerAccountId = e.login
+    //     return {
+    //       email: "me@me.me",
+    //       emailVerified: new Date(),
+    //       name: "me",
+    //       id: "1",
+    //       image: "https://avatars.githubusercontent.com/u/1?v=4"
+    //     } satisfies AdapterUser
+    //   default:
+    //     return u
+    // }
+    return u
     },
     async updateUser(user) {
       console.log("from adapter[ updateUser ]", JSON.stringify(user))
