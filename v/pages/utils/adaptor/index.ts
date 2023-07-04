@@ -1,6 +1,7 @@
 import { Adapter, AdapterAccount, AdapterSession, AdapterUser, DefaultAdapter, VerificationToken } from "next-auth/adapters"
 import { redirect } from "next/dist/server/api-utils";
 import { NextResponse } from "next/server";
+import path from "path";
 
 
 const users: AdapterUser[] = []
@@ -25,13 +26,16 @@ const getAcc = (acc: {provider: string; providerAccountId: string}) => {
 }
 const get = (id: string) => users.find(u => u.id === id)
 const email = (email: string) => users.find(u => u.email === email)
-const request = (url: string) => {
+
+const request = (p: string) => {
+  if (!process.env.BACKEND_URL) throw new Error("BACKEND_URL is not defined")
+  const url = path.join(process.env.BACKEND_URL, p)
 	const req = fetch(url)
 	.then(res => res.json())
 	.then(r => {
 		switch (r.status){
 			case 200:
-				return r;
+				return r.data;
 			case 404:
         // redirect('/404')
 				NextResponse.redirect('/404')
