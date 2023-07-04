@@ -14,7 +14,7 @@ require (
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
 	github.com/swaggo/gin-swagger v1.5.2
 	github.com/vektah/gqlparser/v2 v2.5.1
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/crypto v0.1.0
 	gopkg.in/dgrijalva/jwt-go.v3 v3.2.0
 	gorm.io/driver/postgres v1.3.8
 	gorm.io/gorm v1.23.8
