@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "description": "xxx",
+  "repository": "https://github.com/amar-jay/...",
+  "bugs": {
+    "url": "https://github.com/amar-jay/go-next/issues"
+  },
+  "homepage": "https://themanan.me",
+  "scripts": {
+    "dev": "next",
+    "dev:turbo": "next --turbo --show-all",
+    "test": "jest",
+    "build": "next build",
+    "start": "next start"
+  },
+  "author": "Amar Jay <me@themanan.me>",
+  "contributors": [
+    "Amar Jay <me@themanan.me>"
+  ],
+  "dependencies": {
+    "@headlessui/react": "^1.7.8",
+    "@monaco-editor/react": "^4.4.6",
+    "jotai": "^2.0.0",
+    "monaco-editor": "^0.34.1",
+    "next": "latest",
+    "next-auth": "latest",
+    "nodemailer": "^6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zod": "^3.20.2",
+    "zustand": "^4.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17",
+    "@types/react": "^18.0.15",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4"
+  }
+}
