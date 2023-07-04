@@ -2,14 +2,19 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import FacebookProvider from "next-auth/providers/facebook"
 import GithubProvider from "next-auth/providers/github"
+import Adapter from "../../../utils/adaptor"
 //import TwitterProvider from "next-auth/providers/twitter"
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
+
+const url = process.env?.NEXTAUTH_URL ?? "/"
+const opts = {}
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export const authOptions = {
   // https://next-auth.js.org/configuration/providers/oauth
+  adapter: Adapter(url),
   providers: [
     /* EmailProvider({
          server: process.env.EMAIL_SERVER,
@@ -46,7 +51,7 @@ export const authOptions = {
     // })
   ],
   theme: {
-    colorScheme: "light",
+    colorScheme: "dark",
   },
   callbacks: {
     /*
@@ -54,7 +59,9 @@ export const authOptions = {
       if (!profile) {
         return false 
       }
-      if (account?.provider === "facebook" || "google" || "github") {
+      if (account?.provider === "facebook" 
+      || account?.provider === "google"
+      || account?.provider === "github") {
         user.name = profile.name
         user.email = profile.email
         user.image = profile.image
