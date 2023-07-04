@@ -10,6 +10,7 @@ import GithubProvider from "next-auth/providers/github"
 // https://next-auth.js.org/configuration/options
 export const authOptions = {
   // https://next-auth.js.org/configuration/providers/oauth
+
   providers: [
     /* EmailProvider({
          server: process.env.EMAIL_SERVER,
@@ -46,7 +47,7 @@ export const authOptions = {
     // })
   ],
   theme: {
-    colorScheme: "light",
+    colorScheme: "dark",
   },
   callbacks: {
     /*
@@ -54,7 +55,9 @@ export const authOptions = {
       if (!profile) {
         return false 
       }
-      if (account?.provider === "facebook" || "google" || "github") {
+      if (account?.provider === "facebook" 
+      || account?.provider === "google"
+      || account?.provider === "github") {
         user.name = profile.name
         user.email = profile.email
         user.image = profile.image

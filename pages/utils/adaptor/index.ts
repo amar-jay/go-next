@@ -1,4 +1,6 @@
-import { Adaptor } from "next-auth/adapters"
+import { Adapter } from "next-auth/adapters"
+import { redirect } from "next/dist/server/api-utils";
+import { NextResponse } from "next/server";
 
 
 const request = (url: string) => {
@@ -9,9 +11,12 @@ const request = (url: string) => {
 			case 200:
 				return r;
 			case 404:
+        // redirect('/404')
 				NextResponse.redirect('/404')
+        return
 			default:
 				NextResponse.redirect('/error')
+        return
 		}
 			return r
 		
@@ -20,7 +25,7 @@ const request = (url: string) => {
 	return req;
 }
 /** @return { import("next-auth/adapters").Adapter } */
-export default function Adapter(client, options = {}):Adaptor {
+const A:Adapter = (client, options = {}) => {
   return {
     async createUser(user) {
 		console.log(JSON.stringify(user))
@@ -80,3 +85,5 @@ export default function Adapter(client, options = {}):Adaptor {
     },
   }
 }
+
+export default A
