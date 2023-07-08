@@ -86,7 +86,7 @@ export const getUserByAccount = async ({ providerAccountId, provider }: Pick<Ada
 		// throw new Error("provider is not email")
 		return null
 	}
-	const {data} = await request.get(`/get-user?provider=${provider}&providerAccountId=${providerAccountId}`)
+	const {data} = await request.get(`/get-user?provider_type=${provider}&account_id=${providerAccountId}`)
 	if (data.status !== 200) {
 		// throw new Error(data.message)
 		return null
@@ -100,7 +100,7 @@ export const updateUser = async (user: Partial<AdapterUser> & Pick<AdapterUser, 
 		throw new Error("id is empty")
 	}
 
-	const {data} = await request.post('/update-user', user)
+	const {data} = await request.put('/update-user', user)
 	if (data.status !== 200) {
 		throw new Error(data.message)
 	}
@@ -108,7 +108,7 @@ export const updateUser = async (user: Partial<AdapterUser> & Pick<AdapterUser, 
 }
 
 export const deleteUser = async (id: string): Promise<void> => {
-	const {data} = await request.post('/delete-user', {id})
+	const {data} = await request.delete('/delete-user/' + id)
 	if (data.status !== 200) {
 		throw new Error(data.message)
 	}
@@ -137,7 +137,7 @@ export const unlinkAccount = async ({provider, providerAccountId}:Pick<AdapterAc
 	}
 
 	const {data} = await request.post('/unlink-account', {
-		provider,
+		providerType: provider,
 		providerAccountId
 	})
 

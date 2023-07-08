@@ -3,10 +3,10 @@ package cmd
 import (
 	"log"
 	"os"
-	"os/user"
 	"strconv"
 
 	models "github.com/amar-jay/go-api-boilerplate/database/domain/session"
+	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/pkg/config"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"

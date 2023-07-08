@@ -8,10 +8,13 @@ import (
 type User struct {
 	FirstName string `gorm:"size:255"`
 	LastName  string `gorm:"size:255"`
-	Email     string `gorm:"NOT NULL; UNIQUE_INDEX"`
-	Password  string `gorm:"NOT NULL"`
-	Role      string `gorm:"NOT_NULL;size:255;DEFAULT:'standard'"`
-	Active    bool   `gorm:"NOT NULL; DEFAULT: true"`
+	UserID    string `gorm:"size:255;unique"`
+
+	Image    string `gorm:"size:255"`
+	Email    string `gorm:"NOT NULL;UNIQUE_INDEX"`
+	Password string `gorm:"NOT NULL"`
+	Role     string `gorm:"NOT_NULL;size:255;DEFAULT:'standard'"`
+	Active   bool   `gorm:"NOT NULL; DEFAULT: true"`
 	gorm.Model
 	gen.RegisterInput
 }
@@ -19,11 +22,13 @@ type User struct {
 func (u *User) ToGql() *gen.User {
 	return &gen.User{
 		FirstName: u.FirstName,
-		LastName:  u.LastName,
+		LastName:  &u.LastName,
 		Email:     u.Email,
 		Role:      u.Role,
 		Active:    u.Active,
-		ID:        int(u.ID),
+		Image:     &u.Image,
+		// UserID:    u.UserID,
+		ID: int(u.ID),
 	}
 }
 

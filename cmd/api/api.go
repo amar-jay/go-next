@@ -16,7 +16,9 @@ import (
 	"github.com/amar-jay/go-api-boilerplate/cmd"
 	"github.com/amar-jay/go-api-boilerplate/controller/gql"
 	controllers "github.com/amar-jay/go-api-boilerplate/controller/rest"
+	acc_repo "github.com/amar-jay/go-api-boilerplate/database/repository/account"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/password_reset"
+	session_repo "github.com/amar-jay/go-api-boilerplate/database/repository/session"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/user_repo"
 	"github.com/amar-jay/go-api-boilerplate/infra/redis"
 	"github.com/amar-jay/go-api-boilerplate/middleware"
@@ -82,10 +84,17 @@ func other_routers(config config.Config, userController controllers.UserControll
 		})
 	})
 
-	next.POST("/create-session", sessionController.CreateSession)
-	next.GET("/get-session", sessionController.GetSession)
-	next.POST("/update-session", sessionController.UpdateSession)
-	next.POST("/delete-session", sessionController.DeleteSession)
+	next.POST("create-user", userController.CreateUser)
+	next.GET("/get-user-by-id", userController.GetUserByID)
+	next.GET("/get-user-by-email", userController.GetUserByEmail)
+	next.GET("/get-user-by-account", userController.GetUserByAcc)
+	next.GET("/get-user", userController.GetUser)
+	next.PUT("/update-user", userController.Update)
+	next.DELETE("/delete-user/:id", userController.DeleteUser)
+	next.POST("/create-session", userController.CreateSession)
+	next.GET("/get-session", userController.GetSession)
+	next.POST("/update-session", userController.UpdateSession)
+	next.POST("/delete-session", userController.DeleteSession)
 }
 
 func main() {
@@ -135,8 +144,10 @@ func main() {
 	 */
 	userrepo := user_repo.NewUserRepo(db)
 	pswdrepo := password_reset.CreatePasswordReserRepo(db)
+	sessrepo := session_repo.NewSessRepo(db)
+	accrepo := acc_repo.NewAccountRepo(db)
 	hash := hmachash.NewHMAC(config.HashKey)
-	userService := userservice.NewUserService(userrepo, pswdrepo, hash, config.Pepper)
+	userService := userservice.NewUserService(userrepo, pswdrepo, sessrepo, accrepo, hash, config.Pepper)
 	authService := authservice.NewAuthService(config.HashKey)
 	emailService := emailservice.NewEmailService()
 

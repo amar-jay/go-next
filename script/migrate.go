@@ -6,5 +6,6 @@ import (
 
 func main() {
 	_, db, _, _ := cmd.Initialize()
+	db = db.Debug()
 	cmd.Migrate(db)
 }

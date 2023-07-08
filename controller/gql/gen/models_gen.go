@@ -43,10 +43,11 @@ type UpdateUser struct {
 }
 
 type User struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	Active    bool   `json:"active"`
+	ID        int     `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Email     string  `json:"email"`
+	Role      string  `json:"role"`
+	Active    bool    `json:"active"`
+	Image     *string `json:"image"`
 }

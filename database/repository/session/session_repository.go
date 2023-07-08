@@ -19,7 +19,7 @@ type sessRepo struct {
 }
 
 // New user repo instance
-func NewUserRepo(db *gorm.DB) Repo {
+func NewSessRepo(db *gorm.DB) Repo {
 	return &sessRepo{
 		db: db,
 	}
