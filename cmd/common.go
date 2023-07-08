@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"strconv"
 
-	"github.com/amar-jay/go-api-boilerplate/database/domain/session"
+	models "github.com/amar-jay/go-api-boilerplate/database/domain/session"
 	"github.com/amar-jay/go-api-boilerplate/pkg/config"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
@@ -64,7 +64,7 @@ func Migrate(db *gorm.DB) (err error) {
 	// if err != nil {
 	// 	panic(err)
 	// }
-	err = db.AutoMigrate(&session.Session{})
+	err = db.AutoMigrate(&models.Session{})
 	if err != nil {
 		panic(err)
 	}

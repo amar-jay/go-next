@@ -5,10 +5,12 @@ import (
 	"regexp"
 	"strings"
 
+	models "github.com/amar-jay/go-api-boilerplate/database/domain/session"
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	pswd_repo "github.com/amar-jay/go-api-boilerplate/database/repository/password_reset"
+	sess_repo "github.com/amar-jay/go-api-boilerplate/database/repository/session"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/user_repo"
-	"github.com/amar-jay/go-api-boilerplate/pkg/hash"
+	hmachash "github.com/amar-jay/go-api-boilerplate/pkg/hash"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,13 +23,19 @@ type UserService interface {
 	GetUserByID(id uint) (*user.User, error)
 	Login(input *user.User) (*user.User, error)
 	GetUsers() ([]*user.User, error)
+
+	CreateSession(s *models.Session) error
+	GetSession(token string) (*models.Session, error)
+	DeleteSession(token string) error
+	UpdateSession(s *models.Session) (*models.Session, error)
 }
 
 type userService struct {
-	pepper string
-	Repo   user_repo.Repo
-	pswd   pswd_repo.Repo
-	hmac   hmachash.HMAC
+	pepper    string
+	Repo      user_repo.Repo
+	sess_repo sess_repo.Repo
+	pswd      pswd_repo.Repo
+	hmac      hmachash.HMAC
 }
 
 func NewUserService(repo user_repo.Repo, pswd pswd_repo.Repo, hmac hmachash.HMAC, pepper string) UserService {
@@ -176,4 +184,20 @@ func (us *userService) validate(input *user.User) error {
 	}
 
 	return nil
+}
+
+func (us *userService) CreateSession(s *models.Session) error {
+	return us.sess_repo.CreateSession(s)
+}
+
+func (us *userService) GetSession(token string) (*models.Session, error) {
+	return us.sess_repo.GetSession(token)
+}
+
+func (us *userService) DeleteSession(token string) error {
+	return us.sess_repo.DeleteSessionByToken(token)
+}
+
+func (us *userService) UpdateSession(s *models.Session) (*models.Session, error) {
+	return us.sess_repo.Update(s)
 }

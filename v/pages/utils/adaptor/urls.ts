@@ -207,7 +207,7 @@ export const deleteSession = async (sessionToken: string): Promise<void> => {
 		throw new Error("sessionToken is empty")
 	}
 
-	const {data} = await request.post('/delete-session', {token: sessionToken, expires: new Date().toISOString()})
+	const {data} = await request.post(`/delete-session?token=${sessionToken}`)
 	if (data.status !== 200) {
 		throw new Error(data.message)
 	}

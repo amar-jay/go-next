@@ -1,4 +1,4 @@
-package session
+package models
 
 import (
 	"time"
@@ -9,7 +9,7 @@ import (
 
 type Session struct {
 	UserID  string    `gorm:"size:255" json:"userId"`
-	Token   string    `gorm:"size:255" json:"sessionToken"`
+	Token   string    `gorm:"size:255;unique" json:"sessionToken"`
 	Expires time.Time `gorm:"NOT NULL; DEFAULT: now()" json:"expires"`
 	gorm.Model
 }
