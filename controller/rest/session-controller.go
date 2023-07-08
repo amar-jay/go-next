@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type sessionController struct {
-	userCtrl userController
+type SessionController interface {
 }
+
 
 type session struct {
 	UserID  string `json:"userId"`
@@ -18,13 +18,7 @@ type session struct {
 	Expires string `json:"expires"`
 }
 
-func NewSessionController(userCtrl userController) *sessionController {
-	return &sessionController{
-		userCtrl: userCtrl,
-	}
-}
-
-func (s *sessionController) CreateSession(ctx *gin.Context) {
+func (s *userController) CreateSession(ctx *gin.Context) {
 	var input session
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -66,8 +60,8 @@ func (s *sessionController) CreateSession(ctx *gin.Context) {
 	HttpResponse(ctx, http.StatusOK, "session created successfully", input)
 }
 
-func (s *sessionController) GetSession(ctx *gin.Context) {
-	var token string = ctx.Param("token")
+func (s *userController) GetSession(ctx *gin.Context) {
+	var token string = ctx.Query("token")
 	if token != "" {
 		if sess, err := s.userCtrl.us.GetSession(token); err == nil {
 			HttpResponse(ctx, http.StatusOK, "session found", session{
@@ -85,7 +79,7 @@ func (s *sessionController) GetSession(ctx *gin.Context) {
 	HttpResponse(ctx, http.StatusBadRequest, "invalid params", nil)
 }
 
-func (s *sessionController) UpdateSession(ctx *gin.Context) {
+func (s *userController) UpdateSession(ctx *gin.Context) {
 	// get session from body
 	var input session
 
@@ -117,7 +111,7 @@ func (s *sessionController) UpdateSession(ctx *gin.Context) {
 	// TODO: Update session in database
 
 }
-func (s *sessionController) DeleteSession(ctx *gin.Context) {
+func (s *userController) DeleteSession(ctx *gin.Context) {
 	var token string = ctx.Param("token")
 	if token != "" {
 		// TODO: Delete session from database

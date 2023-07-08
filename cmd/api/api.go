@@ -81,6 +81,11 @@ func other_routers(config config.Config, userController controllers.UserControll
 			"message": "test",
 		})
 	})
+
+	next.POST("/create-session", sessionController.CreateSession)
+	next.GET("/get-session", sessionController.GetSession)
+	next.POST("/update-session", sessionController.UpdateSession)
+	next.POST("/delete-session", sessionController.DeleteSession)
 }
 
 func main() {

@@ -63,6 +63,11 @@ type UserController interface {
 	GetProfile(*gin.Context)
 	ResetPassword(*gin.Context)
 	ForgotPassword(*gin.Context)
+
+	CreateSession(ctx *gin.Context)
+	GetSession(ctx *gin.Context)
+	UpdateSession(ctx *gin.Context)
+	DeleteSession(ctx *gin.Context)
 }
 
 type userController struct {

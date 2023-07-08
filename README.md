@@ -1,5 +1,6 @@
 # Go Api Boilerplate
 
+It was built on top of  go-api-boilerplate
 A Nextjs with golang example. This is just an attempt of how it should be done. And must be inspected before taking to production
 
 
