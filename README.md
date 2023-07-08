@@ -1,4 +1,4 @@
-# Go Api Boilerplate
+# Go Next
 
 It was built on top of  go-api-boilerplate
 A Nextjs with golang example. This is just an attempt of how it should be done. And must be inspected before taking to production
@@ -8,10 +8,6 @@ A Nextjs with golang example. This is just an attempt of how it should be done. 
 To allow authentication from nextjs' next-auth to golang service
 This is just an adapter. 
 
-
-## License
-
-[MIT LICENSED](./LICENSE)
 
 ## Contributing
 
