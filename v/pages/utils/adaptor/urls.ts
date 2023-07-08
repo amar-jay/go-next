@@ -1,7 +1,7 @@
 import axios from 'axios';
 import argon2 from 'argon2';
 import { Adapter, AdapterAccount, AdapterSession, AdapterUser, DefaultAdapter, VerificationToken } from "next-auth/adapters"
-import {nanoid} from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
 import { join } from 'path';
 const baseURL = process.env?.BACKEND_URL ?? 'http://localhost:4000/next';
 
@@ -33,7 +33,7 @@ const request = axios.create({
 export const createUser = async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
 	console.log("Yo I am here in [createUser]")
 
-	const id = nanoid()
+	const id = await uuidv4()
 	const data = await fetch(join(baseURL,`/create-user`), {
 		method: 'POST',
 		body: JSON.stringify({
@@ -46,6 +46,7 @@ export const createUser = async (user: Omit<AdapterUser, "id">): Promise<Adapter
 	if (data.status !== 200) {
 		throw new Error(data.message)
 	}
+	console.log(JSON.stringify(data))
   return {...user, id: data.data.id} 
 }
 

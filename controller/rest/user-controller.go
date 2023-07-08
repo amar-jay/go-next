@@ -43,7 +43,7 @@ type CreateUserInput struct {
 	Active        bool      `json:"active"`
 }
 type UserOutput struct {
-	ID string `json:"ID"`
+	ID string `json:"id"`
 	// FirstName string `json:"firstname"`
 	// LastName  string `json:"lastname"`
 	Name          string    `json:"name"`
@@ -145,7 +145,8 @@ func (userctrl *userController) CreateUser(ctx *gin.Context) {
 		HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	HttpResponse(ctx, http.StatusOK, "added user successfully", nil)
+	user := userctrl.mapToUserOutput(&x)
+	HttpResponse(ctx, http.StatusOK, "added user successfully", user)
 }
 func (userctrl *userController) Login(ctx *gin.Context) {
 
@@ -331,7 +332,7 @@ func (userctrl *userController) GetUserByAcc(ctx *gin.Context) {
 		return
 	}
 
-	u, err := userctrl.us.GetUserByAccount(acc_id, provider_type)
+	u, err := userctrl.us.GetUserByAccount(provider_type, acc_id)
 	if err != nil {
 		handleErr(ctx, err, "user not found")
 		return
