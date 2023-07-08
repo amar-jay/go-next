@@ -1,7 +1,7 @@
 import { Adapter, AdapterAccount, AdapterSession, AdapterUser, DefaultAdapter, VerificationToken } from "next-auth/adapters"
 import { redirect } from "next/dist/server/api-utils";
 import { NextResponse } from "next/server";
-import { createSession, createUser, createVerificationToken, deleteSession, deleteUser, getSessionAndUser, getUser, getUserByAccount, getUserByEmail, linkAccount, unlinkAccount, updateSession, updateUser } from "./urls"
+import { createSession, createUser, createVerificationToken, deleteSession, deleteUser, getSessionAndUser, getUser, getUserByAccount, getUserByEmail, linkAccount, unlinkAccount, updateSession, updateUser, useVerificationToken } from "./urls"
 import path from "path";
 
 
@@ -166,15 +166,16 @@ const A = (url: string): Adapter => {
     //     expires,
     //   } satisfies VerificationToken
     // },
-    async useVerificationToken({ identifier, token, ...rest }) {
-      console.log("from adapter[ useVerificationToken ]", JSON.stringify({ identifier, token, ...rest}))
-      return {
-        identifier,
-        token,
-        expires: new Date(),
-        ...rest,
-      } satisfies VerificationToken
-    },
+    useVerificationToken,
+  //   async useVerificationToken({ identifier, token, ...rest }) {
+  //     console.log("from adapter[ useVerificationToken ]", JSON.stringify({ identifier, token, ...rest}))
+  //     return {
+  //       identifier,
+  //       token,
+  //       expires: new Date(),
+  //       ...rest,
+  //     } satisfies VerificationToken
+  //   },
   } 
 }
 

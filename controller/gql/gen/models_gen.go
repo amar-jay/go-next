@@ -24,6 +24,18 @@ type RegisterLoginOutput struct {
 	User  *User  `json:"user"`
 }
 
+type Session struct {
+	UserID  string `json:"userId"`
+	Token   string `json:"token"`
+	Expires string `json:"expires"`
+}
+
+type SessionInput struct {
+	UserID  string `json:"userId"`
+	Token   string `json:"token"`
+	Expires string `json:"expires"`
+}
+
 type UpdateUser struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`

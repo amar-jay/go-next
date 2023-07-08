@@ -1,32 +1,32 @@
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
-  - controllers/gql/schema/*.graphql
+  - controller/gql/schema/*.graphql
 
 exec:
-  filename: controllers/gql/gen/generated.go
+  filename: controller/gql/gen/generated.go
   package: gen
 
 model:
-  filename: controllers/gql/gen/models_gen.go
+  filename: controller/gql/gen/models_gen.go
   package: gen 
 
 resolver: 
- filename: controllers/gql/resolver.go
+ filename: controller/gql/resolver.go
  type: Resolver
  package: gql
 
 autobind: 
-  - 'github.com/amar-jay/go-api-boilerplate/controllers/gql/models'
+  # - 'github.com/amar-jay/go-api-boilerplate/controller/gql/models'
 
 # resolver:
 #   layout: follow-schema
-#   dir: controllers/gql
+#   dir: controller/gql
 #   package: gql 
 
 models:
-  UUID:
-    model:
-      - github.com/amar-jay/go-api-boilerplate/controllers/gql/models.UUID
+  # UUID:
+  #   model:
+      # - github.com/amar-jay/go-api-boilerplate/controller/gql/models.UUID
 
   ID:
     model:

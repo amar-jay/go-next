@@ -48,10 +48,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateSession  func(childComplexity int, session SessionInput) int
+		DeleteSession  func(childComplexity int, token string) int
 		ForgotPassword func(childComplexity int, email string) int
+		GetSession     func(childComplexity int, token string) int
 		Login          func(childComplexity int, input LoginInput) int
 		Register       func(childComplexity int, input RegisterInput) int
 		ResetPassword  func(childComplexity int, token string, password string) int
+		UpdateSession  func(childComplexity int, session SessionInput) int
 		UpdateUser     func(childComplexity int, input UpdateUser) int
 	}
 
@@ -63,6 +67,12 @@ type ComplexityRoot struct {
 	RegisterLoginOutput struct {
 		Token func(childComplexity int) int
 		User  func(childComplexity int) int
+	}
+
+	Session struct {
+		Expires func(childComplexity int) int
+		Token   func(childComplexity int) int
+		UserID  func(childComplexity int) int
 	}
 
 	User struct {
@@ -81,6 +91,10 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, input UpdateUser) (*Message, error)
 	ForgotPassword(ctx context.Context, email string) (*Message, error)
 	ResetPassword(ctx context.Context, token string, password string) (*RegisterLoginOutput, error)
+	CreateSession(ctx context.Context, session SessionInput) (*Session, error)
+	GetSession(ctx context.Context, token string) (*Session, error)
+	UpdateSession(ctx context.Context, session SessionInput) (*Session, error)
+	DeleteSession(ctx context.Context, token string) (*Message, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id int) (*User, error)
@@ -116,6 +130,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Message.Text(childComplexity), true
 
+	case "Mutation.createSession":
+		if e.complexity.Mutation.CreateSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSession_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSession(childComplexity, args["session"].(SessionInput)), true
+
+	case "Mutation.deleteSession":
+		if e.complexity.Mutation.DeleteSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteSession_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteSession(childComplexity, args["token"].(string)), true
+
 	case "Mutation.forgotPassword":
 		if e.complexity.Mutation.ForgotPassword == nil {
 			break
@@ -127,6 +165,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ForgotPassword(childComplexity, args["email"].(string)), true
+
+	case "Mutation.getSession":
+		if e.complexity.Mutation.GetSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_getSession_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GetSession(childComplexity, args["token"].(string)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -163,6 +213,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["token"].(string), args["password"].(string)), true
+
+	case "Mutation.updateSession":
+		if e.complexity.Mutation.UpdateSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateSession_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateSession(childComplexity, args["session"].(SessionInput)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -208,6 +270,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RegisterLoginOutput.User(childComplexity), true
+
+	case "Session.expires":
+		if e.complexity.Session.Expires == nil {
+			break
+		}
+
+		return e.complexity.Session.Expires(childComplexity), true
+
+	case "Session.token":
+		if e.complexity.Session.Token == nil {
+			break
+		}
+
+		return e.complexity.Session.Token(childComplexity), true
+
+	case "Session.userId":
+		if e.complexity.Session.UserID == nil {
+			break
+		}
+
+		return e.complexity.Session.UserID(childComplexity), true
 
 	case "User.active":
 		if e.complexity.User.Active == nil {
@@ -261,6 +344,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputRegisterInput,
+		ec.unmarshalInputSessionInput,
 		ec.unmarshalInputUpdateUser,
 	)
 	first := true
@@ -336,6 +420,13 @@ type User {
   active: Boolean!
 }
 
+type Session {
+  # id: Int!
+  userId: String!
+  token: String!
+  expires: String!
+}
+
 type RegisterLoginOutput {
   token: String!
   user: User!
@@ -364,6 +455,11 @@ input UpdateUser {
   email: String!
 }
 
+input SessionInput {
+  userId: String!
+  token: String!
+  expires: String!
+}
 
 #-- queries and mutations--
 type Query {
@@ -377,6 +473,10 @@ type Mutation {
   updateUser(input: UpdateUser!): Message!
   forgotPassword(email: String!): Message!
   resetPassword(token: String!, password: String!): RegisterLoginOutput!
+  createSession(session: SessionInput!): Session!
+  getSession(token: String!): Session!
+  updateSession(session: SessionInput!): Session!
+  deleteSession(token: String!): Message!
 }
 
 `, BuiltIn: false},
@@ -386,6 +486,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createSession_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 SessionInput
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSessionInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSessionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteSession_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -402,13 +532,28 @@ func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_getSession_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["token"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 LoginInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐLoginInput(ctx, tmp)
+		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐLoginInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -423,7 +568,7 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	var arg0 RegisterInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -456,13 +601,28 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateSession_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 SessionInput
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSessionInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSessionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 UpdateUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUpdateUser(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUpdateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -654,7 +814,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -714,7 +874,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -774,7 +934,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -834,7 +994,7 @@ func (ec *executionContext) _Mutation_forgotPassword(ctx context.Context, field 
 	}
 	res := resTmp.(*Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -894,7 +1054,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	}
 	res := resTmp.(*RegisterLoginOutput)
 	fc.Result = res
-	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
+	return ec.marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterLoginOutput(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -921,6 +1081,252 @@ func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_resetPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createSession(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSession(rctx, fc.Args["session"].(SessionInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Session)
+	fc.Result = res
+	return ec.marshalNSession2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "token":
+				return ec.fieldContext_Session_token(ctx, field)
+			case "expires":
+				return ec.fieldContext_Session_expires(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_getSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_getSession(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GetSession(rctx, fc.Args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Session)
+	fc.Result = res
+	return ec.marshalNSession2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_getSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "token":
+				return ec.fieldContext_Session_token(ctx, field)
+			case "expires":
+				return ec.fieldContext_Session_expires(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_getSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateSession(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateSession(rctx, fc.Args["session"].(SessionInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Session)
+	fc.Result = res
+	return ec.marshalNSession2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "token":
+				return ec.fieldContext_Session_token(ctx, field)
+			case "expires":
+				return ec.fieldContext_Session_expires(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteSession(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteSession(rctx, fc.Args["token"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Message)
+	fc.Result = res
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "text":
+				return ec.fieldContext_Message_text(ctx, field)
+			case "code":
+				return ec.fieldContext_Message_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -954,7 +1360,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1022,7 +1428,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1251,7 +1657,7 @@ func (ec *executionContext) _RegisterLoginOutput_user(ctx context.Context, field
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_RegisterLoginOutput_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1276,6 +1682,138 @@ func (ec *executionContext) fieldContext_RegisterLoginOutput_user(ctx context.Co
 				return ec.fieldContext_User_active(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Session_userId(ctx context.Context, field graphql.CollectedField, obj *Session) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Session_userId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Session_userId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Session",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Session_token(ctx context.Context, field graphql.CollectedField, obj *Session) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Session_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Session_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Session",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Session_expires(ctx context.Context, field graphql.CollectedField, obj *Session) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Session_expires(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Expires, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Session_expires(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Session",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3406,6 +3944,50 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSessionInput(ctx context.Context, obj interface{}) (SessionInput, error) {
+	var it SessionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userId", "token", "expires"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "token":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "expires":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expires"))
+			it.Expires, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (UpdateUser, error) {
 	var it UpdateUser
 	asMap := map[string]interface{}{}
@@ -3541,6 +4123,30 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_resetPassword(ctx, field)
 			})
 
+		case "createSession":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createSession(ctx, field)
+			})
+
+		case "getSession":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_getSession(ctx, field)
+			})
+
+		case "updateSession":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateSession(ctx, field)
+			})
+
+		case "deleteSession":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteSession(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3647,6 +4253,48 @@ func (ec *executionContext) _RegisterLoginOutput(ctx context.Context, sel ast.Se
 		case "user":
 
 			out.Values[i] = ec._RegisterLoginOutput_user(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var sessionImplementors = []string{"Session"}
+
+func (ec *executionContext) _Session(ctx context.Context, sel ast.SelectionSet, obj *Session) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sessionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Session")
+		case "userId":
+
+			out.Values[i] = ec._Session_userId(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "token":
+
+			out.Values[i] = ec._Session_token(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "expires":
+
+			out.Values[i] = ec._Session_expires(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -4073,16 +4721,16 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐLoginInput(ctx context.Context, v interface{}) (LoginInput, error) {
+func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐLoginInput(ctx context.Context, v interface{}) (LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
 	return ec._Message(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4092,16 +4740,16 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterInput(ctx context.Context, v interface{}) (RegisterInput, error) {
+func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterInput(ctx context.Context, v interface{}) (RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRegisterLoginOutput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v RegisterLoginOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNRegisterLoginOutput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v RegisterLoginOutput) graphql.Marshaler {
 	return ec._RegisterLoginOutput(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v *RegisterLoginOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐRegisterLoginOutput(ctx context.Context, sel ast.SelectionSet, v *RegisterLoginOutput) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4109,6 +4757,25 @@ func (ec *executionContext) marshalNRegisterLoginOutput2ᚖgithubᚗcomᚋamar�
 		return graphql.Null
 	}
 	return ec._RegisterLoginOutput(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSession2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSession(ctx context.Context, sel ast.SelectionSet, v Session) graphql.Marshaler {
+	return ec._Session(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSession2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSession(ctx context.Context, sel ast.SelectionSet, v *Session) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Session(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSessionInput2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐSessionInput(ctx context.Context, v interface{}) (SessionInput, error) {
+	res, err := ec.unmarshalInputSessionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4126,16 +4793,16 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUpdateUser(ctx context.Context, v interface{}) (UpdateUser, error) {
+func (ec *executionContext) unmarshalNUpdateUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUpdateUser(ctx context.Context, v interface{}) (UpdateUser, error) {
 	res, err := ec.unmarshalInputUpdateUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4159,7 +4826,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4179,7 +4846,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋamarᚑjayᚋgoᚑ
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollersᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋamarᚑjayᚋgoᚑapiᚑboilerplateᚋcontrollerᚋgqlᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
