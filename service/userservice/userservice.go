@@ -76,11 +76,11 @@ func (us *userService) CreateUser(u *user.User) error {
 		return err
 	}
 
-	// check if user already exists
-	_, err := us.Repo.GetUserByEmail(u.Email)
-	if err == nil {
-		return errors.New("user already exists")
-	}
+	// // check if user already exists
+	// _, err := us.Repo.GetUserByEmail(u.Email)
+	// if err == nil {
+	// 	return errors.New("user already exists")
+	// }
 
 	return us.Repo.CreateUser(u)
 	//return fmt.Errorf("USER SERVICE ERROR: Register not implemented")

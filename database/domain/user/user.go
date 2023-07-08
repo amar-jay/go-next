@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/amar-jay/go-api-boilerplate/controller/gql/gen"
 	"github.com/jinzhu/gorm"
 )
@@ -10,11 +12,12 @@ type User struct {
 	LastName  string `gorm:"size:255"`
 	UserID    string `gorm:"size:255;unique"`
 
-	Image    string `gorm:"size:255"`
-	Email    string `gorm:"NOT NULL;UNIQUE_INDEX"`
-	Password string `gorm:"NOT NULL"`
-	Role     string `gorm:"NOT_NULL;size:255;DEFAULT:'standard'"`
-	Active   bool   `gorm:"NOT NULL; DEFAULT: true"`
+	Image         string    `gorm:"size:255"`
+	Email         string    `gorm:"NOT NULL;UNIQUE_INDEX"`
+	EmailVerified time.Time `gorm:"NOT NULL;DEFAULT: now()"`
+	Password      string    `gorm:"NOT NULL"`
+	Role          string    `gorm:"NOT_NULL;size:255;DEFAULT:'standard'"`
+	Active        bool      `gorm:"NOT NULL; DEFAULT: true"`
 	gorm.Model
 	gen.RegisterInput
 }

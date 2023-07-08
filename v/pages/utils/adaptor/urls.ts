@@ -2,6 +2,7 @@ import axios from 'axios';
 import argon2 from 'argon2';
 import { Adapter, AdapterAccount, AdapterSession, AdapterUser, DefaultAdapter, VerificationToken } from "next-auth/adapters"
 import {nanoid} from 'nanoid';
+import { join } from 'path';
 const baseURL = process.env?.BACKEND_URL ?? 'http://localhost:4000/next';
 
 
@@ -30,13 +31,17 @@ const request = axios.create({
 });
 
 export const createUser = async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
+	console.log("Yo I am here in [createUser]")
 
 	const id = nanoid()
-	const {data} = await request.post('/create-user', {
-		...user,
-		id,
-		// sid: await hash(id)
-	})
+	const data = await fetch(join(baseURL,`/create-user`), {
+		method: 'POST',
+		body: JSON.stringify({
+			...user,
+			id,
+			// sid: await hash(id)
+		})
+	}).then(res => res.json())
 
 	if (data.status !== 200) {
 		throw new Error(data.message)
@@ -45,6 +50,7 @@ export const createUser = async (user: Omit<AdapterUser, "id">): Promise<Adapter
 }
 
 export const getUser = async (id: string): Promise<AdapterUser | null> => {
+	console.log("Yo I am here in [getUser]")
 	if (id.length < 1) {
 		// throw new Error("id is empty")
 		return null
@@ -61,21 +67,23 @@ export const getUser = async (id: string): Promise<AdapterUser | null> => {
 
 
 export const getUserByEmail = async (email: string): Promise<AdapterUser | null> => {
+	console.log("Yo I am here in [getUserByEmail]")
 	if (email.length < 1) {
 		// throw new Error("email is empty")
 		return null
 	}
 
-	const {data} = await request.get(`/get-user?email=${email}`)
-	if (data.status !== 200) {
+	const data = await fetch(join(baseURL,`/get-user-by-email?email=${email}`)).then(res => res.json())
+	if (data?.status !== 200) {
 		// throw new Error(data.message)
 		return null
 	}
-	return data.data as AdapterUser
+	return data?.data as AdapterUser
 
 }
 
 export const getUserByAccount = async ({ providerAccountId, provider }: Pick<AdapterAccount, "provider" | "providerAccountId">): Promise<AdapterUser | null> => {
+	console.log("Yo I am here in [getUserByAccount]")
 	const providers = ['github', 'google', 'facebook', 'email']
 	if (providerAccountId.length < 1 || provider.length < 1) {
 		// throw new Error("providerAccountId is empty")
@@ -86,16 +94,20 @@ export const getUserByAccount = async ({ providerAccountId, provider }: Pick<Ada
 		// throw new Error("provider is not email")
 		return null
 	}
-	const {data} = await request.get(`/get-user?provider_type=${provider}&account_id=${providerAccountId}`)
-	if (data.status !== 200) {
+	console.log(join(baseURL,`/get-user-by-account?provider_type=${provider}&account_id=${providerAccountId}`))
+	const data = await fetch(join(baseURL,`/get-user-by-account?provider_type=${provider}&account_id=${providerAccountId}`), {
+		method: 'GET',
+	}).then(res => res.json())
+	if (data?.status !== 200) {
 		// throw new Error(data.message)
 		return null
 	}
-	return data.data as AdapterUser
+	return data?.data as AdapterUser
 
 }
 
 export const updateUser = async (user: Partial<AdapterUser> & Pick<AdapterUser, "id">): Promise<AdapterUser> => {
+	console.log("Yo I am here in [updateUser]")
 	if (user.id.length < 1) {
 		throw new Error("id is empty")
 	}
@@ -108,6 +120,7 @@ export const updateUser = async (user: Partial<AdapterUser> & Pick<AdapterUser, 
 }
 
 export const deleteUser = async (id: string): Promise<void> => {
+	console.log("Yo I am here in [deleteUser]")
 	const {data} = await request.delete('/delete-user/' + id)
 	if (data.status !== 200) {
 		throw new Error(data.message)
@@ -115,6 +128,7 @@ export const deleteUser = async (id: string): Promise<void> => {
 }
 
 export const linkAccount = async (account: AdapterAccount): Promise<void> => {
+	console.log("Yo I am here in [linkAccount]")
 	// TODO: hash user id
 	const {data} = await request.post('/link-account', {
 		id: account.userId,
@@ -132,6 +146,7 @@ export const linkAccount = async (account: AdapterAccount): Promise<void> => {
 }
 
 export const unlinkAccount = async ({provider, providerAccountId}:Pick<AdapterAccount, "provider" | "providerAccountId">): Promise<void> => {
+	console.log("Yo I am here in [unlinkAccount]")
 	if (providerAccountId.length < 1 || provider.length < 1) {
 		throw new Error("providerAccountId is empty")
 	}
@@ -148,6 +163,7 @@ export const unlinkAccount = async ({provider, providerAccountId}:Pick<AdapterAc
 }
 
 export const createSession = async (session: AdapterSession): Promise<AdapterSession> => {
+	console.log("Yo I am here in [createSession]")
 	const {userId, ...opts} = session
 	const {data} = await request.post('/create-session', {
 		id: userId,
@@ -161,6 +177,7 @@ export const createSession = async (session: AdapterSession): Promise<AdapterSes
 }
 
 export const getSessionAndUser = async (sessionToken: string): Promise<{session: AdapterSession, user: AdapterUser}> => {
+	console.log("Yo I am here in [getSessionAndUser]")
 	if (sessionToken.length < 1) {
 		throw new Error("sessionToken is empty")
 	}
@@ -187,6 +204,7 @@ export const getSessionAndUser = async (sessionToken: string): Promise<{session:
 }
 
 export const updateSession = async (session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">): Promise<AdapterSession> => {
+	console.log("Yo I am here in [updateSession]")
 	if (session.sessionToken.length < 1) {
 		throw new Error("sessionToken is empty")
 	}
@@ -203,6 +221,7 @@ export const updateSession = async (session: Partial<AdapterSession> & Pick<Adap
 }
 
 export const deleteSession = async (sessionToken: string): Promise<void> => {
+	console.log("Yo I am here in [deleteSession]")
 	if (sessionToken.length < 1) {
 		throw new Error("sessionToken is empty")
 	}
@@ -214,6 +233,7 @@ export const deleteSession = async (sessionToken: string): Promise<void> => {
 }
 
 export const createVerificationToken = async ({identifier, expires, token}: VerificationToken): Promise<VerificationToken> => {
+	console.log("Yo I am here in [createVerificationToken]")
 	if (token.length < 1) {
 		throw new Error("token is empty")
 	}
@@ -242,6 +262,7 @@ export const createVerificationToken = async ({identifier, expires, token}: Veri
 }
 
 export const useVerificationToken = async ({token, identifier}: { identifier: string, token: string}): Promise<VerificationToken> => {
+	console.log("Yo I am here in [useVerificationToken]")
 	if (token.length < 1) {
 		throw new Error("token is empty")
 	}

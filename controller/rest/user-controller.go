@@ -131,13 +131,14 @@ func (userctrl *userController) CreateUser(ctx *gin.Context) {
 		lastName = n[1]
 	}
 	x := user.User{
-		UserID:    u.ID,
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     u.Email,
-		Image:     u.Image,
-		Role:      u.Role,
-		Active:    u.Active,
+		UserID:        u.ID,
+		FirstName:     firstName,
+		LastName:      lastName,
+		Email:         u.Email,
+		EmailVerified: u.EmailVerified,
+		Image:         u.Image,
+		Role:          u.Role,
+		Active:        u.Active,
 	}
 
 	if err := userctrl.us.CreateUser(&x); err != nil {
@@ -322,23 +323,15 @@ func (userctrl *userController) GetUserByEmail(ctx *gin.Context) {
 }
 
 func (userctrl *userController) GetUserByAcc(ctx *gin.Context) {
-	var body map[string]string
-	// get the body from the request
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		if err.Error() == "EOF" {
-			HttpResponse(ctx, http.StatusBadRequest, "invalid argument in body", nil)
-			return
-		}
-		HttpResponse(ctx, http.StatusBadRequest, "unable to parse body", nil)
+	acc_id := ctx.Query("account_id")
+	provider_type := ctx.Query("provider_type")
+
+	if acc_id == "" || provider_type == "" {
+		HttpResponse(ctx, http.StatusBadRequest, "invalid params", nil)
 		return
 	}
 
-	if body["account_id"] == "" || body["provider_type"] == "" {
-		HttpResponse(ctx, http.StatusBadRequest, "invalid argument", nil)
-		return
-	}
-
-	u, err := userctrl.us.GetUserByAccount(body["account_id"], body["provider_type"])
+	u, err := userctrl.us.GetUserByAccount(acc_id, provider_type)
 	if err != nil {
 		handleErr(ctx, err, "user not found")
 		return
@@ -411,16 +404,4 @@ func (userctrl *userController) login(ctx *gin.Context, u *user.User, message st
 	out := gin.H{"token": token}
 	HttpResponse(ctx, http.StatusOK, message, out)
 	return nil
-}
-
-func handleErr(ctx *gin.Context, err error, e string) {
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			HttpResponse(ctx, http.StatusNotFound, e, nil)
-			return
-		}
-
-		HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
-		return
-	}
 }

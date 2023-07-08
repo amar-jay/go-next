@@ -1,4 +1,5 @@
 import { Adaptor } from "next-auth/adapters"
+import { NextResponse } from "next/server"
 
 
 const request = (url: string) => {
