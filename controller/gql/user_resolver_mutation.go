@@ -3,6 +3,8 @@ package gql
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 
 	// "errors"
 	"github.com/amar-jay/go-api-boilerplate/controller/gql/gen"
@@ -67,5 +69,37 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, pass
 	return &gen.RegisterLoginOutput{
 		Token: "foo",
 		User:  &gen.User{},
+	}, nil
+}
+
+func (r *mutationResolver) CreateSession(ctx context.Context, session gen.SessionInput) (*gen.Session, error) {
+	return &gen.Session{
+		UserID: session.UserID,
+		Token:  session.Token,
+		// Expires: session.Expires,
+	}, nil
+}
+func (r *mutationResolver) DeleteSession(ctx context.Context, token string) (*gen.Message, error) {
+	return &gen.Message{
+		Code: fmt.Sprintln(http.StatusNoContent),
+		Text: "Session deleted",
+	}, nil
+
+}
+
+func (r *mutationResolver) GetSession(ctx context.Context, userId string) (*gen.Session, error) {
+	return &gen.Session{
+		UserID: userId,
+		Token:  "",
+		// Expires: session.Expires,
+	}, nil
+
+}
+
+func (r *mutationResolver) UpdateSession(ctx context.Context, session gen.SessionInput) (*gen.Session, error) {
+	return &gen.Session{
+		UserID: session.UserID,
+		Token:  session.Token,
+		// Expires: session.Expires,
 	}, nil
 }

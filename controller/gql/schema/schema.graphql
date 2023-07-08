@@ -6,10 +6,18 @@
 type User {
   id: Int!
   firstName: String!
-  lastName: String!
+  lastName: String
   email: String!
   role: String!
   active: Boolean!
+  image: String
+}
+
+type Session {
+  # id: Int!
+  userId: String!
+  token: String!
+  expires: String!
 }
 
 type RegisterLoginOutput {
@@ -40,6 +48,11 @@ input UpdateUser {
   email: String!
 }
 
+input SessionInput {
+  userId: String!
+  token: String!
+  expires: String!
+}
 
 #-- queries and mutations--
 type Query {
@@ -53,5 +66,9 @@ type Mutation {
   updateUser(input: UpdateUser!): Message!
   forgotPassword(email: String!): Message!
   resetPassword(token: String!, password: String!): RegisterLoginOutput!
+  createSession(session: SessionInput!): Session!
+  getSession(token: String!): Session!
+  updateSession(session: SessionInput!): Session!
+  deleteSession(token: String!): Message!
 }
 

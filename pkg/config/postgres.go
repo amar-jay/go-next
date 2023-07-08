@@ -21,12 +21,13 @@ type PostgresConfig struct {
 // db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 // Dialect returns the dialect for postgres
 func (c *PostgresConfig) Config() *gorm.Config {
-	return &gorm.Config{}
+	return &gorm.Config{
+		// Logger: logger.Default.LogMode(logger.Info),
+	}
 }
 
 // GetConnectionInfo returns the connection info for postgres
 func (c *PostgresConfig) GetConnectionInfo() gorm.Dialector {
-	fmt.Println(c.Host, c.Port, c.User, c.Password, c.Database)
 	dns := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Password, c.Database)
 	return postgres.Open(dns)
 }

@@ -24,6 +24,18 @@ type RegisterLoginOutput struct {
 	User  *User  `json:"user"`
 }
 
+type Session struct {
+	UserID  string `json:"userId"`
+	Token   string `json:"token"`
+	Expires string `json:"expires"`
+}
+
+type SessionInput struct {
+	UserID  string `json:"userId"`
+	Token   string `json:"token"`
+	Expires string `json:"expires"`
+}
+
 type UpdateUser struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -31,10 +43,11 @@ type UpdateUser struct {
 }
 
 type User struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	Active    bool   `json:"active"`
+	ID        int     `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Email     string  `json:"email"`
+	Role      string  `json:"role"`
+	Active    bool    `json:"active"`
+	Image     *string `json:"image"`
 }

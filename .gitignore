@@ -9,6 +9,7 @@
 .debug
 tmp
 bin/
+.bin/
 
 #IDE
 .vscode

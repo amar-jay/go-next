@@ -20,13 +20,17 @@
   "dependencies": {
     "@headlessui/react": "^1.7.8",
     "@monaco-editor/react": "^4.4.6",
+    "argon2": "^0.30.3",
+    "axios": "^1.4.0",
     "jotai": "^2.0.0",
     "monaco-editor": "^0.34.1",
+    "nanoid": "^4.0.2",
     "next": "latest",
     "next-auth": "latest",
     "nodemailer": "^6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "uuid": "^9.0.0",
     "zod": "^3.20.2",
     "zustand": "^4.3.2"
   },

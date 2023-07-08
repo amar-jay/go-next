@@ -20,7 +20,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*gen.User, error) {
 	for _, user := range ser {
 		users = append(users, &gen.User{
 			FirstName: user.FirstName,
-			LastName:  user.LastName,
+			LastName:  &user.LastName,
+			Image:     &user.Image,
 			Email:     user.Email,
 			Role:      user.Role,
 			Active:    user.Active,
@@ -34,7 +35,7 @@ func (r *queryResolver) User(ctx context.Context, id int) (*gen.User, error) {
 	if id < 0 {
 		return nil, errors.New("invalid id")
 	}
-	uid := uint(id)
+	uid := string(id)
 	_user, err := r.UserService.GetUserByID(uid)
 
 	if err != nil {
@@ -44,7 +45,8 @@ func (r *queryResolver) User(ctx context.Context, id int) (*gen.User, error) {
 	return &gen.User{
 		Email:     _user.Email,
 		FirstName: _user.FirstName,
-		LastName:  _user.LastName,
+		LastName:  &_user.LastName,
+		Image:     &_user.Image,
 		Role:      _user.Role,
 		Active:    _user.Active,
 		ID:        int(_user.ID),

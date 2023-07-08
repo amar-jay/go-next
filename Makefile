@@ -14,6 +14,8 @@ run:
 	go run ./cmd/...
 clean:	compose-local-down
 	rm -rf bin/
+migrate:
+	go run ./script/migrate.go
 generate:
 	go get github.com/99designs/gqlgen@v0.17.24
 	go run github.com/99designs/gqlgen generate ./...
@@ -36,4 +38,6 @@ compose-prod-restart:
 	docker-compose -f compose.yml restart
 compose-prod-logs:
 	docker-compose -f compose.yml logs -f
+env-push:
+	node v/pages/script/env_push.js
 

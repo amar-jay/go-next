@@ -1,24 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 
 	//"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/jinzhu/gorm"
-	"github.com/joho/godotenv"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"gorm.io/gorm"
 
+	"github.com/amar-jay/go-api-boilerplate/cmd"
 	"github.com/amar-jay/go-api-boilerplate/controller/gql"
 	controllers "github.com/amar-jay/go-api-boilerplate/controller/rest"
-	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
+	acc_repo "github.com/amar-jay/go-api-boilerplate/database/repository/account"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/password_reset"
+	session_repo "github.com/amar-jay/go-api-boilerplate/database/repository/session"
 	"github.com/amar-jay/go-api-boilerplate/database/repository/user_repo"
 	"github.com/amar-jay/go-api-boilerplate/infra/redis"
 	"github.com/amar-jay/go-api-boilerplate/middleware"
@@ -76,10 +76,32 @@ func other_routers(config config.Config, userController controllers.UserControll
 		account.GET("/profile", userController.GetProfile)
 		account.PUT("/profile", userController.Update)
 	}
+
+	next := router.Group("/next")
+	next.GET("/test", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "test",
+		})
+	})
+
+	next.POST("create-user", userController.CreateUser)
+	next.GET("/get-user-by-id", userController.GetUserByID)
+	next.GET("/get-user-by-email", userController.GetUserByEmail)
+	next.GET("/get-user-by-account", userController.GetUserByAcc)
+	next.GET("/get-user", userController.GetUser)
+	next.PUT("/update-user", userController.Update)
+	next.DELETE("/delete-user/:id", userController.DeleteUser)
+	next.POST("/create-session", userController.CreateSession)
+	next.GET("/get-session", userController.GetSession)
+	next.POST("/update-session", userController.UpdateSession)
+	next.POST("/delete-session", userController.DeleteSession)
+	next.POST("/link-account", userController.LinkAccount)
+	next.POST("/unlink-account", userController.UnlinkAccount)
 }
 
 func main() {
-	var port string;
+	var port string
+	migrateOpt := flag.Bool("migrate", false, "Migrate the database")
 	log.Println("Starting server...")
 	err := router.SetTrustedProxies([]string{"192.168.1.2", "::1"})
 
@@ -91,47 +113,27 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middleware.GinContextToMiddleWare())
 
-
-	// load env file
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error in loading env files. Default $PORT must be set")
-	}
-
-	config := config.GetConfig();
-	//port = strconv.Itoa(config.Port);
-	if len(os.Args) > 1 {
-		port = os.Args[1];
-	} else {
-		port = strconv.Itoa(config.Port);
+	config, db, port, err := cmd.Initialize()
+	if err != nil {
+		panic(err)
 	}
 
 	if config.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	if *migrateOpt {
+		cmd.Migrate(db)
+	}
+
 	// swagger url - http://localhost:8080/swagger/index.html
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	db, err := gorm.Open(
-		config.Postgres.GetConnectionInfo(),
-		config.Postgres.Config(),
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
-	// Migrate the schema
-	err = db.AutoMigrate(&user.User{})
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Database migrated successfully")
-
-	redis_test();
+	// redis_test()
 	router.GET("/", func(c *gin.Context) {
 		log.Printf("ClientIP: %s\n", c.ClientIP())
-		c.Redirect(http.StatusMovedPermanently, "/graphql")
-//		c.JSON(http.StatusOK, gin.H{"Amar": "Jay", "clientIP": c.ClientIP()})
+		c.Redirect(http.StatusTemporaryRedirect, "/graphql")
+		//		c.JSON(http.StatusOK, gin.H{"Amar": "Jay", "clientIP": c.ClientIP()})
 	})
 
 	// Testing the database
@@ -144,27 +146,29 @@ func main() {
 	 */
 	userrepo := user_repo.NewUserRepo(db)
 	pswdrepo := password_reset.CreatePasswordReserRepo(db)
+	sessrepo := session_repo.NewSessRepo(db)
+	accrepo := acc_repo.NewAccountRepo(db)
 	hash := hmachash.NewHMAC(config.HashKey)
-	userService := userservice.NewUserService(userrepo, pswdrepo, hash, config.Pepper)
+	userService := userservice.NewUserService(userrepo, pswdrepo, sessrepo, accrepo, hash, config.Pepper)
 	authService := authservice.NewAuthService(config.HashKey)
 	emailService := emailservice.NewEmailService()
 
 	/**
-	 ----- Controllers -----
-	 */
+	----- Controllers -----
+	*/
 
 	userController := controllers.NewUserController(userService, authService, emailService)
 
 	/**
 	  ----- Routing -----
-	 */
+	*/
 	router.GET("/graphql", gql.PlaygroundHandler("/query"))
 	router.POST("/query", gql.GraphQLHandler(userService, authService, emailService),
 		func(c *gin.Context) {
 			middleware.SetUserContext(config.JWTSecret)
 		})
 
-	other_routers(config, userController);
+	other_routers(config, userController)
 
 	// Run server
 	log.Printf("Running on http://localhost:%s/\n", port)
