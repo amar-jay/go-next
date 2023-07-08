@@ -36,7 +36,7 @@ func (repo *accRepo) DeleteAccount(
 	provider_type string,
 	providerID string,
 ) error {
-	if err := repo.db.Where("provider_type = ? && provider_id = ?", provider_type, providerID).Delete(&models.Account{}).Error; err != nil {
+	if err := repo.db.Where("provider_type = ? AND provider_id = ?", provider_type, providerID).Delete(&models.Account{}).Error; err != nil {
 		return err
 	}
 
@@ -46,9 +46,13 @@ func (repo *accRepo) DeleteAccount(
 // get first account by provider type and id
 func (repo *accRepo) GetAccountByProvider(type_ string, id string) (*models.Account, error) {
 	var s models.Account
-	if err := repo.db.Where("provider_type = ? && provider_id = ?", type_, id).First(&s).Error; err != nil {
+	// TODO: rewrite this query in a better way
+	if err := repo.db.Where("provider_type = ? AND provider_id = ?", type_, id).First(&s).Error; err != nil {
 		return nil, err
 	}
+	// if err := repo.db.Where("provider_type = ? AND provider_id = ?", type_, id).First(&s).Error; err != nil {
+	// 	return nil, err
+	// }
 
 	return &s, nil
 }

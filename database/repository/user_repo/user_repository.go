@@ -75,7 +75,8 @@ func (repo *userRepo) DeleteUser(id string) error {
 		return errors.New("id is required")
 	}
 
-	return repo.db.Where("user_id = ?", id).Delete(&user.User{}).Error
+	// soft delete user
+	return repo.db.Where("user_id = ?", id).Update("active", false).Error
 }
 
 // func (repo *userRepo) GetUserByAccount(provider_type string, acc_id string) (*user.User, error) {

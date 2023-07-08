@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/amar-jay/go-api-boilerplate/database/domain/account"
 	models "github.com/amar-jay/go-api-boilerplate/database/domain/session"
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/pkg/config"
@@ -69,6 +70,10 @@ func Migrate(db *gorm.DB) (err error) {
 		panic(err)
 	}
 
+	err = db.AutoMigrate(&account.Account{})
+	if err != nil {
+		panic(err)
+	}
 	log.Println("Database migrated successfully")
 	return
 }

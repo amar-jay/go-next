@@ -22,6 +22,7 @@ type UserService interface {
 	validate(input *user.User) error
 	Register(user *user.User) error
 	Update(user *user.User) error
+	CreateUser(user *user.User) error
 	GetUserByID(id string) (*user.User, error)
 	GetUserByEmail(email string) (*user.User, error)
 	GetUserByAccount(provider_type string, acc_id string) (*user.User, error)
@@ -67,6 +68,22 @@ func (us *userService) DeleteUser(id string) error {
 
 	return us.Repo.DeleteUser(id)
 
+}
+
+// no password here. this creates a user without a password
+func (us *userService) CreateUser(u *user.User) error {
+	if err := validateEmail(u.Email); err != nil {
+		return err
+	}
+
+	// check if user already exists
+	_, err := us.Repo.GetUserByEmail(u.Email)
+	if err == nil {
+		return errors.New("user already exists")
+	}
+
+	return us.Repo.CreateUser(u)
+	//return fmt.Errorf("USER SERVICE ERROR: Register not implemented")
 }
 func (us *userService) Register(u *user.User) error {
 	if err := us.validate(u); err != nil {
@@ -150,7 +167,7 @@ func (us *userService) GetUserByAccount(provider_type string, acc_id string) (*u
 		return nil, err
 	}
 
-	u, err := us.Repo.GetUserByID(acc.UserID)
+	u, err := us.Repo.GetUserByID(acc.UserId)
 	if err != nil {
 		return nil, err
 	}

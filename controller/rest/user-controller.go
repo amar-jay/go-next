@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/amar-jay/go-api-boilerplate/database/domain/user"
 	"github.com/amar-jay/go-api-boilerplate/service/authservice"
 	"github.com/amar-jay/go-api-boilerplate/service/emailservice"
 	"github.com/amar-jay/go-api-boilerplate/service/userservice"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	JsonParseErr = "error parsing json: "
 )
 
 /**
@@ -27,13 +32,26 @@ type RegisterUserInput struct {
 	Password  string `json:"password"`
 	Role      string `json:"role"`
 }
+
+type CreateUserInput struct {
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	Email         string    `json:"email"`
+	EmailVerified time.Time `json:"emailVerified"`
+	Image         string    `json:"image"`
+	Role          string    `json:"role"`
+	Active        bool      `json:"active"`
+}
 type UserOutput struct {
-	ID        uint   `json:"ID"`
-	FirstName string `json:"firstname"`
-	LastName  string `json:"lastname"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	Active    bool   `json:"acive"`
+	ID string `json:"ID"`
+	// FirstName string `json:"firstname"`
+	// LastName  string `json:"lastname"`
+	Name          string    `json:"name"`
+	Image         string    `json:"image"`
+	Email         string    `json:"email"`
+	EmailVerified time.Time `json:"emailVerified"`
+	Role          string    `json:"role"`
+	Active        bool      `json:"active"`
 }
 
 type UserUpdateInput struct {
@@ -92,12 +110,44 @@ func NewUserController(us userservice.UserService, as authservice.AuthService, e
  */
 
 func (userctrl *userController) CreateUser(ctx *gin.Context) {
-	// TODO: create user controller logic
-	HttpResponse(ctx, http.StatusOK, "unimplemented yet", nil)
+	var u CreateUserInput
+	if err := ctx.ShouldBindJSON(&u); err != nil {
+		if err.Error() == "EOF" {
+			HttpResponse(ctx, http.StatusBadRequest, "invalid request body", nil)
+			return
+		}
+
+		HttpResponse(ctx, http.StatusBadRequest, JsonParseErr+err.Error(), nil)
+		return
+	}
+
+	if u.ID == "" || u.Name == "" || u.Email == "" {
+		HttpResponse(ctx, http.StatusBadRequest, "invalid request body", nil)
+	}
+	var firstName, lastName string
+	n := strings.Split(u.Name, " ")
+	if len(n) > 1 {
+		firstName = n[0]
+		lastName = n[1]
+	}
+	x := user.User{
+		UserID:    u.ID,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     u.Email,
+		Image:     u.Image,
+		Role:      u.Role,
+		Active:    u.Active,
+	}
+
+	if err := userctrl.us.CreateUser(&x); err != nil {
+		HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	HttpResponse(ctx, http.StatusOK, "added user successfully", nil)
 }
 func (userctrl *userController) Login(ctx *gin.Context) {
 
-	// TODO: Get user input
 	var input LoginUserInput
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -106,7 +156,6 @@ func (userctrl *userController) Login(ctx *gin.Context) {
 	}
 
 	u := userctrl.login_input_to_User(input)
-	// TODO: Get User from Database
 	user, err := userctrl.us.Login(&u)
 	if err != nil {
 		HttpResponse(ctx, http.StatusInternalServerError, err.Error(), nil)
@@ -273,11 +322,7 @@ func (userctrl *userController) GetUserByEmail(ctx *gin.Context) {
 }
 
 func (userctrl *userController) GetUserByAcc(ctx *gin.Context) {
-	// var body map[string]string
-	var body struct {
-		Id    string `json:"account_id"`
-		Type_ string `json:"provider_type"`
-	}
+	var body map[string]string
 	// get the body from the request
 	if err := ctx.ShouldBindJSON(&body); err != nil {
 		if err.Error() == "EOF" {
@@ -288,17 +333,19 @@ func (userctrl *userController) GetUserByAcc(ctx *gin.Context) {
 		return
 	}
 
-	// if body["account_id"] == "" || body["provider_type"] == "" {
-	// 	HttpResponse(ctx, http.StatusBadRequest, "invalid argument", nil)
-	// 	return
-	// }
-
-	if body.Id == "" || body.Type_ == "" {
+	if body["account_id"] == "" || body["provider_type"] == "" {
 		HttpResponse(ctx, http.StatusBadRequest, "invalid argument", nil)
 		return
 	}
-	// TODO: get user by account controller logic
-	HttpResponse(ctx, http.StatusExpectationFailed, "unimplemented yet", nil)
+
+	u, err := userctrl.us.GetUserByAccount(body["account_id"], body["provider_type"])
+	if err != nil {
+		handleErr(ctx, err, "user not found")
+		return
+	}
+
+	user := userctrl.mapToUserOutput(u)
+	HttpResponse(ctx, http.StatusOK, "ok", user)
 }
 func (userctrl *userController) GetUserByID(ctx *gin.Context) {
 	id := ctx.Query("id")
@@ -346,12 +393,13 @@ func (userctrl *userController) register_input_to_User(input RegisterUserInput) 
 
 func (userctrl *userController) mapToUserOutput(input *user.User) *UserOutput {
 	return &UserOutput{
-		ID:        input.ID,
-		Email:     input.Email,
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Active:    input.Active,
-		Role:      input.Role,
+		ID:            input.UserID,
+		Email:         input.Email,
+		Image:         input.Image,
+		Name:          input.FirstName + " " + input.LastName,
+		EmailVerified: input.CreatedAt,
+		Active:        input.Active,
+		Role:          input.Role,
 	}
 }
 func (userctrl *userController) login(ctx *gin.Context, u *user.User, message string) error {

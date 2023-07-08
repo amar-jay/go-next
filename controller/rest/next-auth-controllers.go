@@ -158,14 +158,14 @@ func (s *userController) LinkAccount(ctx *gin.Context) {
 	}
 
 	if err := s.us.LinkAccount(&account.Account{
-		ID:                input.ID,
-		SID:               input.SID,
-		ProviderID:        input.ProviderID,
-		ProviderType:      input.Type,
-		AccountID:         input.AccID,
-		RefreshToken:      input.RefreshToken,
-		AccessToken:       input.AccessToken,
-		AcessTokenExpires: input.Expires,
+		ID:                 input.ID,
+		SID:                input.SID,
+		ProviderId:         input.ProviderID,
+		ProviderType:       input.Type,
+		AccountID:          input.AccID,
+		RefreshToken:       input.RefreshToken,
+		AccessToken:        input.AccessToken,
+		AccessTokenExpires: input.Expires,
 	}); err != nil {
 		HttpResponse(ctx, http.StatusInternalServerError, "Database input error: "+err.Error(), nil)
 		return

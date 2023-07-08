@@ -95,6 +95,8 @@ func other_routers(config config.Config, userController controllers.UserControll
 	next.GET("/get-session", userController.GetSession)
 	next.POST("/update-session", userController.UpdateSession)
 	next.POST("/delete-session", userController.DeleteSession)
+	next.POST("/link-account", userController.LinkAccount)
+	next.POST("/unlink-account", userController.UnlinkAccount)
 }
 
 func main() {
